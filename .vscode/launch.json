@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "name": "Debug SentryExample",
+      "program": "${workspaceFolder:swift-sentry}\\.build/debug/SentryExample",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-sentry}",
+      "preLaunchTask": "swift: Build Debug SentryExample"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "name": "Release SentryExample",
+      "program": "${workspaceFolder:swift-sentry}\\.build/release/SentryExample",
+      "args": [],
+      "cwd": "${workspaceFolder:swift-sentry}",
+      "preLaunchTask": "swift: Build Release SentryExample"
+    }
+  ]
+}
