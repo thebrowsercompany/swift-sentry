@@ -12,10 +12,10 @@ let package = Package(
         .executable(
             name: "SentryExample",
             targets: ["SentryExample"]
-        )
+        ),
     ],
     dependencies: [
-        .package(url: "https://github.com/compnerd/swift-win32", branch: "main")
+        .package(url: "https://github.com/compnerd/swift-win32", branch: "main"),
     ],
     targets: [
         .executableTarget(
@@ -31,30 +31,31 @@ let package = Package(
                 .copy("../../vendor/sentry-native/bin/sentry.dll"),
             ],
             swiftSettings: [
-                .unsafeFlags(["-parse-as-library"])
+                .unsafeFlags(["-parse-as-library"]),
             ]
         ),
         .target(
             name: "sentry",
             publicHeadersPath: "include",
             cSettings: [
-                .headerSearchPath("../../vendor/sentry-native/include")
+                .headerSearchPath("../../vendor/sentry-native/include"),
             ],
             linkerSettings: [
                 .unsafeFlags([
-                    "-Lvendor/sentry-native/lib"
-                ])
+                    "-Lvendor/sentry-native/lib",
+                ]),
             ]
         ),
         .target(
             name: "SwiftSentry",
             dependencies: ["sentry"],
             cSettings: [
-                .headerSearchPath("../../vendor/sentry-native/include")
+                .headerSearchPath("../../vendor/sentry-native/include"),
             ]
         ),
         .testTarget(
             name: "SwiftSentryTests",
-            dependencies: ["SwiftSentry"]),
+            dependencies: ["SwiftSentry"]
+        ),
     ]
 )

@@ -5,12 +5,13 @@ import SwiftWin32
 final class SceneDelegate: WindowSceneDelegate {
   var window: Window?
 
-  func scene(_ scene: Scene, willConnectTo session: SceneSession,
-             options: Scene.ConnectionOptions) {
+  func scene(_ scene: Scene, willConnectTo _: SceneSession,
+             options _: Scene.ConnectionOptions)
+  { 
     guard let windowScene = scene as? WindowScene else { return }
 
-    self.window = Window(windowScene: windowScene)
-    self.window?.rootViewController = SentryExampleViewController()
-    self.window?.makeKeyAndVisible()
+    window = Window(windowScene: windowScene)
+    window?.rootViewController = SentryExampleViewController()
+    window?.makeKeyAndVisible()
   }
 }

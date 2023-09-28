@@ -1,10 +1,12 @@
-import SwiftWin32
+// SPDX-License-Identifier: BSD-3-Clause
+
 import SwiftSentry
+import SwiftWin32
 
 extension Button {
-  internal convenience init(frame: Rect, title: String) {
+  convenience init(frame: Rect, title: String) { 
     self.init(frame: frame)
-    self.setTitle(title, forState: .normal)
+    setTitle(title, forState: .normal)
   }
 }
 
@@ -16,15 +18,15 @@ final class SentryExampleViewController: ViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    self.title = "Sentry Example"
+    title = "Sentry Example"
     view.addSubview(button)
 
     button.addTarget(self, action: SentryExampleViewController.crash,
-                        for: .primaryActionTriggered)
+                     for: .primaryActionTriggered)
 
     LayoutConstraint.activate([
       .init(item: button, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0),
-      .init(item: button, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0)
+.init(item: button, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0),
     ])
   }
 
