@@ -9,9 +9,10 @@ let package = Package(
             name: "swift-sentry",
             targets: ["SwiftSentry"]
         ),
+        .library(name: "Testingt", type: .dynamic, targets: ["testing"]),
         .executable(
             name: "SentryExample",
-            targets: ["SentryExample"]
+            targets: ["SentryExample", "testing"]
         ),
     ],
     dependencies: [
@@ -46,6 +47,7 @@ let package = Package(
                 ]),
             ]
         ),
+        .target(name:"testing"),
         .target(
             name: "SwiftSentry",
             dependencies: ["sentry"],
