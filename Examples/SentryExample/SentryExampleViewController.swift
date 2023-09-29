@@ -3,15 +3,11 @@
 import SwiftSentry
 import SwiftWin32
 
-extension Button {
-  convenience init(frame: Rect, title: String) { 
-    self.init(frame: frame)
-    setTitle(title, forState: .normal)
-  }
-}
-
 final class SentryExampleViewController: ViewController {
-  let button = Button(frame: .init(x: 0, y: 0, width: 200, height: 200), title: "Crash")
+  let abortButton = Button(frame: .zero, title: "abort()")
+  let fatalErrorButton = Button(frame: .zero, title: "fatalError()")
+  let badIndexButton = Button(frame: .zero, title: "[0][1]")
+
   override init() {
     super.init()
   }
@@ -19,18 +15,38 @@ final class SentryExampleViewController: ViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     title = "Sentry Example"
-    view.addSubview(button)
+    view.addSubview(abortButton)
+    view.addSubview(fatalErrorButton)
+    view.addSubview(badIndexButton)
 
-    button.addTarget(self, action: SentryExampleViewController.crash,
-                     for: .primaryActionTriggered)
+    abortButton.addTarget(self, action: SentryExampleViewController.abortAction,
+                          for: .primaryActionTriggered)
+    fatalErrorButton.addTarget(self, action: SentryExampleViewController.fatalErrorAction,
+                               for: .primaryActionTriggered)
+    badIndexButton.addTarget(self, action: SentryExampleViewController.badIndexAction,
+                             for: .primaryActionTriggered)
 
-    LayoutConstraint.activate([
-      .init(item: button, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1, constant: 0),
-.init(item: button, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1, constant: 0),
-    ])
+    layoutViews()
   }
 
-  func crash() {
+  private func layoutViews() {
+    let buttonWidth = view.bounds.width / 3
+    let buttonHeight = 40.0
+
+    abortButton.frame = .init(x: 0, y: 0, width: buttonWidth, height: buttonHeight)
+    fatalErrorButton.frame = .init(x: abortButton.frame.maxX, y: 0, width: buttonWidth, height: buttonHeight)
+    badIndexButton.frame = .init(x: fatalErrorButton.frame.maxX, y: 0, width: buttonWidth, height: buttonHeight)
+  }
+
+  private func abortAction() {
+    abort()
+  }
+
+  private func fatalErrorAction() {
+    fatalError("Boom goes the dynamite!")
+  }
+
+  private func badIndexAction() {
     [0][1]
   }
 }
