@@ -25,11 +25,6 @@ let package = Package(
                 .product(name: "SwiftWin32", package: "swift-win32"),
             ],
             path: "Examples/SentryExample",
-            resources: [
-                .copy("../../vendor/sentry-native/bin/crashpad_handler.exe"),
-                .copy("../../vendor/sentry-native/bin/crashpad_wer.dll"),
-                .copy("../../vendor/sentry-native/bin/sentry.dll"),
-            ],
             swiftSettings: [
                 .unsafeFlags(["-parse-as-library"]),
             ]
@@ -49,6 +44,11 @@ let package = Package(
         .target(
             name: "SwiftSentry",
             dependencies: ["sentry"],
+            resources: [
+                .copy("../../vendor/sentry-native/bin/crashpad_handler.exe"),
+                .copy("../../vendor/sentry-native/bin/crashpad_wer.dll"),
+                .copy("../../vendor/sentry-native/bin/sentry.dll"),
+            ],
             cSettings: [
                 .headerSearchPath("../../vendor/sentry-native/include"),
             ]
