@@ -4,6 +4,10 @@
 <dict>
   <key>CFBundleIdentifier</key>
   <string>company.thebrowser.SentryExample</string>
+  <key>CFBundleShortVersionString</key>
+  <string>0.0.0</string>
+  <key>CFBundleVersion</key>
+  <string>0</string>
   <key>ApplicationSceneManifest</key>
   <dict>
     <key>ApplicationSupportsMultipleScenes</key>

@@ -6,44 +6,52 @@ import sentry
 import Foundation
 
 public enum Sentry {
-  public static func start(with dsn: String) {
-    DispatchQueue.main.async {
-      let options = sentry_options_new()!
-
-      sentry_options_set_dsn(options, dsn.cString(using: .utf8))
-      sentry_options_set_symbolize_stacktraces(options, 1)
-      sentry_options_set_environment(options, "development");
-      sentry_options_set_database_path(options, ".sentry-native")
-      sentry_options_set_release(options, "browser-win@0.0.0")
-      sentry_options_set_debug(options, 1)
-      sentry_init(options)
-      _installAbortCatcherWorkaround()
-    }
+  @MainActor
+  public static func start(_ configureOptions: (inout Options) -> Void) {
+    var options = Options()
+    configureOptions(&options)
+    start(options)
   }
 
-  // Required to get around issues with https://github.com/getsentry/sentry-native/issues/591
-  private static func _installAbortCatcherWorkaround() {
-    signal(SIGINT) { code in
-      print("Caught SIGINT: \(code)")
+  @MainActor
+  public static func start(_ options: Options) {
+    guard !options.dsn.isEmpty else {
+      fatalError("Sentry DSN must not be empty!")
     }
-    signal(SIGILL) { code in
-      print("Caught SIGILL: \(code)")
+
+    let o = sentry_options_new()
+
+    sentry_options_set_dsn(o, options.dsn.cString(using: .utf8))
+    sentry_options_set_symbolize_stacktraces(o, options.attachStacktrace ? 1 : 0)
+    sentry_options_set_environment(o, options.environment.cString(using: .utf8))
+
+    guard let cachePath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+      fatalError("Unable to find caches directory for storing Sentry reports!")
     }
-    signal(SIGFPE) { code in
-      print("Caught SIGFPE: \(code)")
+
+    let sentryCachePath = cachePath
+    .appendingPathComponent("io.sentry")
+    .appendingPathComponent(String(options.dsn.hash))
+    .path
+
+    sentry_options_set_database_path(o, sentryCachePath.cString(using: .utf8))
+
+    if options.debug {
+      sentry_options_set_debug(o, 1)
     }
-    signal(SIGSEGV) { code in
-      print("Caught SIGSEGV: \(code)")
+
+    if let release = options.releaseName {
+      sentry_options_set_release(o, release.cString(using: .utf8))
     }
-    signal(SIGTERM) { code in
-      print("Caught SIGTERM: \(code)")
+
+    if let beforeHandler = options.beforeSend {
+      sentry_options_set_before_send(o, { event, _, _ -> sentry_value_t in
+        // eventually call before handler...
+        return event
+      }, nil)
     }
-    signal(SIGBREAK) { code in
-      print("Caught SIGBREAK: \(code)")
-    }
-    signal(SIGABRT) { code in
-      print("Caught SIGABRT: \(code)")
-    }
+
+    sentry_init(o)
   }
 
   private static func test() {
