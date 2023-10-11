@@ -33,8 +33,9 @@ jobs:
 
       - name: Configure sentry-native
         run: |
-          cmake -B ${{ github.workspace }}\sentry-native\build `
+          cmake -B build `
           -D CMAKE_BUILD_TYPE=RelWithDebInfo `
+          -S ${{ github.workspace }}\sentry-native `
           -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
           -G "Visual Studio 17 2022" `
           -A x64
