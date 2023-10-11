@@ -1,14 +1,12 @@
 name: Windows Build (sentry-native)
 
 on:
-  pull_request:
-  # workflow_dispatch:
-  #   inputs:
-  #     sentry-native-tag:
-  #       type: string
-  #       description: The tag of sentry-native to build
-  #       required: false
-  #       default: "0.6.6"
+  workflow_dispatch:
+    inputs:
+      sentry-native-tag:
+        type: string
+        description: The tag of sentry-native to build
+        required: true
 
 jobs:
   windows:
@@ -20,8 +18,7 @@ jobs:
         with:
           repository: getsentry/sentry-native
           path: "sentry-native"
-          # ref: ${{ github.event.inputs.sentry-native-tag }}
-          ref: "0.6.6"
+          ref: ${{ github.event.inputs.sentry-native-tag }}
           submodules: 'recursive'
 
       - name: Setup Visual Studio
