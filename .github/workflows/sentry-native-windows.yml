@@ -40,12 +40,12 @@ jobs:
           -G "Visual Studio 17 2022" `
           -A x64
       - name: Build sentry-native
-        run: cmake --build ${{ github.workspace }}\sentry-native\build --parallel --config RelWithDebInfo
+        run: cmake --build build --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install ${{ github.workspace }}\sentry-native\build --prefix ${{ github.workspace }}\sentry-native\install --config RelWithDebInfo
+        run: cmake --install build --prefix install --config RelWithDebInfo
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: sentry-native-windows-amd64
-          path: ${{ github.workspace }}\sentry-native\install
+          path: install
