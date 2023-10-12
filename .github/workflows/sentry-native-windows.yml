@@ -17,6 +17,11 @@ jobs:
         architecture: ["x64"]
 
     steps:
+      - name: Checkout swift-sentry sources
+        uses: actions/checkout@v4
+        with:
+          path: "swift-sentry"
+
       - name: Checkout sentry-native sources
         uses: actions/checkout@v4
         with:
@@ -47,8 +52,8 @@ jobs:
 
       - name: Package NuGet Package
         run: |
-          $treeish = git log -1 --format=%h
-          nuget pack -Properties DESTDIR=install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} sentry-native.nuspec
+          $treeish = git -C swift-sentry log -1 --format=%h
+          nuget pack -Properties DESTDIR=install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} swift-sentry\sentry-native.nuspec
 
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
@@ -59,4 +64,4 @@ jobs:
       - name: Upload NuGet Package
         uses: actions/upload-artifact@v3
         with:
-          path: *.nupkg
+          path: "*.nupkg"
