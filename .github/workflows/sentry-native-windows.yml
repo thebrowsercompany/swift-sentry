@@ -1,7 +1,6 @@
 name: Windows Build (sentry-native)
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       sentry-native-tag:
