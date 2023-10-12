@@ -45,8 +45,18 @@ jobs:
       - name: Install sentry-native
         run: cmake --install build\${{ matrix.architecture }} --prefix install\${{ matrix.architecture }} --config RelWithDebInfo
 
-      - name: Upload Artifacts
+      - name: Package NuGet Package
+        run: |
+          $treeish = git log -1 --format=%h
+          nuget pack -Properties DESTDIR=install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} sentry-native.nuspec
+
+      - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: sentry-native-windows-${{ github.event.inputs.sentry-native-tag }}-${{ matrix.architecture }}
           path: install\${{ matrix.architecture }}
+
+      - name: Upload NuGet Package
+        uses: actions/upload-artifact@v3
+        with:
+          path: *.nupkg
