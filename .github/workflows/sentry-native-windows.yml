@@ -1,6 +1,7 @@
 name: Windows Build (sentry-native)
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       sentry-native-tag:
@@ -11,6 +12,10 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        architecture: ["x64", "arm64"]
 
     steps:
       - name: Checkout sentry-native sources
@@ -18,7 +23,8 @@ jobs:
         with:
           repository: getsentry/sentry-native
           path: "sentry-native"
-          ref: ${{ github.event.inputs.sentry-native-tag }}
+          # ref: ${{ github.event.inputs.sentry-native-tag }}
+          ref: "0.6.6"
           submodules: 'recursive'
 
       - name: Setup Visual Studio
@@ -30,19 +36,19 @@ jobs:
 
       - name: Configure sentry-native
         run: |
-          cmake -B build `
-          -D CMAKE_BUILD_TYPE=RelWithDebInfo `
-          -S ${{ github.workspace }}\sentry-native `
-          -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
-          -G "Visual Studio 17 2022" `
-          -A x64
+          cmake -B build\${{ matrix.architecture }} `
+                -D CMAKE_BUILD_TYPE=RelWithDebInfo `
+                -S ${{ github.workspace }}\sentry-native `
+                -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
+                -G "Visual Studio 17 2022" `
+                -A ${{ matrix.architecture }}
       - name: Build sentry-native
-        run: cmake --build build --parallel --config RelWithDebInfo
+        run: cmake --build build\${{ matrix.architecture }} --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install build --prefix install --config RelWithDebInfo
+        run: cmake --install build\${{ matrix.architecture }} --prefix install\${{ matrix.architecture }} --config RelWithDebInfo
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: sentry-native-windows-amd64
-          path: install
+          name: sentry-native-windows-${{ matrix.architecture }}
+          path: install\${{ matrix.architecture }}
