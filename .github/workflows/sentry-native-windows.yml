@@ -1,6 +1,7 @@
 name: Windows Build (sentry-native)
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       sentry-native-tag:
@@ -33,7 +34,8 @@ jobs:
         with:
           repository: getsentry/sentry-native
           path: "sentry-native"
-          ref: ${{ github.event.inputs.sentry-native-tag }}
+          # ref: ${{ github.event.inputs.sentry-native-tag }}
+          ref: "0.6.6"
           submodules: 'recursive'
 
       - name: Setup Visual Studio
