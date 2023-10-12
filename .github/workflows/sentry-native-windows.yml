@@ -63,7 +63,7 @@ jobs:
           $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
           nuget pack `
                 -Properties DESTDIR=${{ github.workspace }}\install\${{ matrix.architecture }} `
-                -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+                -Version 0.6.6-${treeish} `
                 ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
 
       - name: Publish NuGet Package
