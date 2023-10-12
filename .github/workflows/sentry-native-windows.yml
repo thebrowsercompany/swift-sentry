@@ -8,6 +8,11 @@ on:
         description: The tag of sentry-native to build
         required: true
 
+permissions:
+  # required to make OIDC work
+  id-token: write
+  packages: write
+
 jobs:
   windows:
     runs-on: windows-latest
@@ -53,7 +58,25 @@ jobs:
       - name: Package NuGet Package
         run: |
           $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
-          nuget pack -Properties DESTDIR=${{ github.workspace }}\install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
+          nuget pack `
+                -Properties DESTDIR=${{ github.workspace }}\install\${{ matrix.architecture }} `
+                -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+                ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
+
+      - name: Publish NuGet Package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: thebrowsercompany-bot2
+          NUGET_PUBLISH_URL: https://nuget.pkg.github.com/thebrowsercompany/index.json
+          NUGET_SOURCE_NAME: TheBrowserCompany
+        run: |
+          nuget sources list | find "%NUGET_SOURCE_NAME%"
+          if errorlevel 0 (
+            nuget sources remove -name %NUGET_SOURCE_NAME%
+          )
+          nuget sources Add -Name %NUGET_SOURCE_NAME% -Source %NUGET_PUBLISH_URL% -username %GITHUB_USERNAME% -password %GITHUB_TOKEN% -StorePasswordInClearText
+          nuget setApiKey %GITHUB_TOKEN% -Source %NUGET_PUBLISH_URL%
+          nuget push ${{ github.workspace }}\*.nupkg -Source %NUGET_SOURCE_NAME% -SkipDuplicate
 
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
