@@ -39,21 +39,21 @@ jobs:
 
       - name: Configure sentry-native
         run: |
-          cmake -B build\${{ matrix.architecture }} `
+          cmake -B ${{ github.workspace }}\build\${{ matrix.architecture }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}\sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A ${{ matrix.architecture }}
       - name: Build sentry-native
-        run: cmake --build build\${{ matrix.architecture }} --parallel --config RelWithDebInfo
+        run: cmake --build ${{ github.workspace }}\build\${{ matrix.architecture }} --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install build\${{ matrix.architecture }} --prefix install\${{ matrix.architecture }} --config RelWithDebInfo
+        run: cmake --install ${{ github.workspace }}\build\${{ matrix.architecture }} --prefix ${{ github.workspace }}\install\${{ matrix.architecture }} --config RelWithDebInfo
 
       - name: Package NuGet Package
         run: |
-          $treeish = git -C swift-sentry log -1 --format=%h
-          nuget pack -Properties DESTDIR=install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} swift-sentry\sentry-native.nuspec
+          $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
+          nuget pack -Properties DESTDIR=${{ github.workspace }}\install\${{ matrix.architecture }} -Version 0.0.0.0-${treeish} ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
 
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
