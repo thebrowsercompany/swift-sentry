@@ -72,9 +72,9 @@ jobs:
           NUGET_SOURCE_NAME: TheBrowserCompany
         run: |
           nuget sources list | find "%NUGET_SOURCE_NAME%"
-          if errorlevel 0 (
+          if ($errorlevel -eq 0) {
             nuget sources remove -name %NUGET_SOURCE_NAME%
-          )
+          }
           nuget sources Add -Name %NUGET_SOURCE_NAME% -Source %NUGET_PUBLISH_URL% -username %GITHUB_USERNAME% -password %GITHUB_TOKEN% -StorePasswordInClearText
           nuget setApiKey %GITHUB_TOKEN% -Source %NUGET_PUBLISH_URL%
           nuget push ${{ github.workspace }}\*.nupkg -Source %NUGET_SOURCE_NAME% -SkipDuplicate
