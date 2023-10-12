@@ -23,8 +23,7 @@ jobs:
         with:
           repository: getsentry/sentry-native
           path: "sentry-native"
-          # ref: ${{ github.event.inputs.sentry-native-tag }}
-          ref: "0.6.6"
+          ref: ${{ github.event.inputs.sentry-native-tag }}
           submodules: 'recursive'
 
       - name: Setup Visual Studio
@@ -50,5 +49,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: sentry-native-windows-${{ matrix.architecture }}
+          name: sentry-native-windows-${{ github.event.inputs.sentry-native-tag }}-${{ matrix.architecture }}
           path: install\${{ matrix.architecture }}
