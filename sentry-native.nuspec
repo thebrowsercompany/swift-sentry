@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>company.thebrowser.sentry-native.crashpad</id>
+        <version>0.0.0.0</version>
+        <title>Sentry Native SDK (Crashpad)</title>
+        <description>A NuGet package for the Crashpad version of sentry-native</description>
+        <authors>The Browser Company</authors>
+        <projectUrl>https://github.com/thebrowsercompany/swift-sentry</projectUrl>
+        <repository type="git" url="https://github.com/thebrowsercompany/swift-sentry" branch="main"/>
+    </metadata>
+    <files>
+        <file src="$DESTDIR$\bin\crashpad_handler.exe" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_handler.pdb" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_wer.dll" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_wer.pdb" target="bin"/>
+        <file src="$DESTDIR$\bin\sentry.dll" target="bin"/>
+        <file src="$DESTDIR$\bin\sentry.pdb" target="bin"/>
+        <file src="$DESTDIR$\include\sentry.h" target="include"/>
+        <file src="$DESTDIR$\lib\sentry.lib" target="lib"/>
+    </files>
+</package>

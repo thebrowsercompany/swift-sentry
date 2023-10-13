@@ -9,3 +9,4 @@ DerivedData/
 /.sentry-native
 Package.resolved
 /vendor/**/*.cmake
+*.nupkg

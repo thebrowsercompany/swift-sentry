@@ -8,6 +8,12 @@ on:
         description: The tag of sentry-native to build
         required: true
 
+permissions:
+  contents: write
+  # required to make OIDC work
+  id-token: write
+  packages: write
+
 jobs:
   windows:
     runs-on: windows-latest
@@ -17,6 +23,11 @@ jobs:
         architecture: ["x64"]
 
     steps:
+      - name: Checkout swift-sentry sources
+        uses: actions/checkout@v4
+        with:
+          path: "swift-sentry"
+
       - name: Checkout sentry-native sources
         uses: actions/checkout@v4
         with:
@@ -34,19 +45,47 @@ jobs:
 
       - name: Configure sentry-native
         run: |
-          cmake -B build\${{ matrix.architecture }} `
+          cmake -B ${{ github.workspace }}\build\${{ matrix.architecture }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}\sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A ${{ matrix.architecture }}
       - name: Build sentry-native
-        run: cmake --build build\${{ matrix.architecture }} --parallel --config RelWithDebInfo
+        run: cmake --build ${{ github.workspace }}\build\${{ matrix.architecture }} --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install build\${{ matrix.architecture }} --prefix install\${{ matrix.architecture }} --config RelWithDebInfo
+        run: cmake --install ${{ github.workspace }}\build\${{ matrix.architecture }} --prefix ${{ github.workspace }}\install\${{ matrix.architecture }} --config RelWithDebInfo
 
-      - name: Upload Artifacts
+      - name: Package NuGet Package
+        run: |
+          $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
+          nuget pack `
+                -Properties DESTDIR=${{ github.workspace }}\install\${{ matrix.architecture }} `
+                -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+                ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
+
+      - name: Publish NuGet Package
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: thebrowsercompany-bot2
+          NUGET_PUBLISH_URL: https://nuget.pkg.github.com/thebrowsercompany/index.json
+          NUGET_SOURCE_NAME: TheBrowserCompany
+        run: |
+          nuget sources list | find "%NUGET_SOURCE_NAME%"
+          if ($errorlevel -eq 0) {
+            nuget sources remove -name %NUGET_SOURCE_NAME%
+          }
+          nuget sources Add -Name %NUGET_SOURCE_NAME% -Source %NUGET_PUBLISH_URL% -username %GITHUB_USERNAME% -password %GITHUB_TOKEN% -StorePasswordInClearText
+          nuget setApiKey %GITHUB_TOKEN% -Source %NUGET_PUBLISH_URL%
+          nuget push ${{ github.workspace }}\*.nupkg -Source %NUGET_SOURCE_NAME% -SkipDuplicate
+
+      - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: sentry-native-windows-${{ github.event.inputs.sentry-native-tag }}-${{ matrix.architecture }}
           path: install\${{ matrix.architecture }}
+
+      - name: Upload NuGet Package
+        uses: actions/upload-artifact@v3
+        with:
+          path: "*.nupkg"
