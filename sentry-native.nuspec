@@ -10,13 +10,13 @@
         <repository type="git" url="https://github.com/thebrowsercompany/swift-sentry" branch="main"/>
     </metadata>
     <files>
-        <file src="$DESTDIR$\bin\crashpad_handler.exe" target="usr\bin"/>
-        <file src="$DESTDIR$\bin\crashpad_handler.pdb" target="usr\bin"/>
-        <file src="$DESTDIR$\bin\crashpad_wer.dll" target="usr\bin"/>
-        <file src="$DESTDIR$\bin\crashpad_wer.pdb" target="usr\bin"/>
-        <file src="$DESTDIR$\bin\sentry.dll" target="usr\bin"/>
-        <file src="$DESTDIR$\bin\sentry.pdb" target="usr\bin"/>
-        <file src="$DESTDIR$\include\sentry.h" target="usr\include"/>
-        <file src="$DESTDIR$\lib\sentry.lib" target="usr\lib"/>
+        <file src="$DESTDIR$\bin\crashpad_handler.exe" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_handler.pdb" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_wer.dll" target="bin"/>
+        <file src="$DESTDIR$\bin\crashpad_wer.pdb" target="bin"/>
+        <file src="$DESTDIR$\bin\sentry.dll" target="bin"/>
+        <file src="$DESTDIR$\bin\sentry.pdb" target="bin"/>
+        <file src="$DESTDIR$\include\sentry.h" target="include"/>
+        <file src="$DESTDIR$\lib\sentry.lib" target="lib"/>
     </files>
 </package>
