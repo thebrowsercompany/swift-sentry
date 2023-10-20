@@ -5,7 +5,7 @@ import SwiftSentry
 import SwiftWin32
 
 @main
-final class SentryExample: ApplicationDelegate {
+final class SentryExampleWin: ApplicationDelegate {
   func application(_: Application, didFinishLaunchingWithOptions _: [Application.LaunchOptionsKey: Any]?) -> Bool {
     print("We're launching!")
     startSentry()

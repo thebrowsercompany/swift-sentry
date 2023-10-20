@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
 import SwiftSentry
 import Foundation
 
@@ -13,7 +15,6 @@ struct MacOSExample {
   static func startSentry() {
     Task {
       await MainActor.run {
-        print("A")
         Sentry.start { options in
           options.dsn = "your-dsn-goes-here"
           options.debug = true
