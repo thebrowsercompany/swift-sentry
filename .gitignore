@@ -8,5 +8,5 @@ DerivedData/
 .netrc
 /.sentry-native
 Package.resolved
-/vendor/**/*.cmake
+/vendor
 *.nupkg
