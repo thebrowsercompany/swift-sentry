@@ -61,7 +61,7 @@ If you are building a project without an `Info.plist` the release value in Sentr
     - On macOS you can simply run `cmake -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo`
 1. Run `cmake --build build --parallel --config RelWithDebInfo` to actually build the project
 1. Run `cmake --install build --prefix install --config RelWithDebInfo` to copy the built products into the `install` directory within sentry-native
-1. Copy the contents of the `install` directory into your `vendory/sentry-native` folder in the required structure as outlined in the [artifacts](#sentry-native-artifacts) section.
+1. Copy the contents of the `install` directory into your `vendor/sentry-native` folder in the required structure as outlined in the [artifacts](#sentry-native-artifacts) section.
 
 ## Supported Platforms
 
