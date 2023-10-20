@@ -67,5 +67,5 @@ If you are building a project without an `Info.plist` the release value in Sentr
 
 This library is still very much a work in progress, but basic functional testing has been preformed on the following platforms:
 
-- Window 11 Pro (`x86_64`-only)
+- Windows 11 Pro (`x86_64`-only)
 - macOS 14.0 (`ARM`-only)
