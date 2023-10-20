@@ -1,2 +1,2 @@
-cp .\Examples\SentryExample\SentryExample.exe.manifest .\.build\debug\
-cp .\Examples\SentryExample\Info.plist .\.build\debug\
+cp .\Examples\SentryExampleWin\SentryExampleWin.exe.manifest .\.build\debug\
+cp .\Examples\SentryExampleWin\Info.plist .\.build\debug\
