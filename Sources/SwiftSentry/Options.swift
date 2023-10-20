@@ -13,9 +13,11 @@ public final class Options {
       return nil
     }
 
-    let bundle = info["CFBundleIdentifier"]!
-    let version = info["CFBundleShortVersionString"]!
-    let build = info["CFBundleVersion"]!
+    guard let bundle = info["CFBundleIdentifier"],
+          let version = info["CFBundleShortVersionString"],
+          let build = info["CFBundleVersion"] else {
+      return nil
+    }
 
     return "\(bundle)@\(version)+\(build)"
   }()
