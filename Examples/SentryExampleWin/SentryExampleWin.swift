@@ -17,17 +17,15 @@ final class SentryExampleWin: ApplicationDelegate {
   }
 
   func startSentry() {
-      print("Spinning up task to start Sentry")
-      Task {
-        await MainActor.run {
-          Sentry.start { options in
-            options.dsn = SentryConfiguration.dsn
-            options.environment = "Debug"
-            options.debug = true
+    print("Spinning up task to start Sentry")
+    Task { @MainActor in
+      Sentry.start { options in
+        options.dsn = SentryConfiguration.dsn
+        options.environment = "Debug"
+        options.debug = true
 
-            print("Release: \(String(describing: options.releaseName))")
-          }
-        }
+        print("Release: \(String(describing: options.releaseName))")
       }
+    }
   }
 }

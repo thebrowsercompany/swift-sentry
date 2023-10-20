@@ -13,12 +13,10 @@ struct MacOSExample {
   }
 
   static func startSentry() {
-    Task {
-      await MainActor.run {
-        Sentry.start { options in
-          options.dsn = "your-dsn-goes-here"
-          options.debug = true
-        }
+    Task { @MainActor in
+      Sentry.start { options in
+        options.dsn = "your-dsn-goes-here"
+        options.debug = true
       }
     }
   }
