@@ -1,7 +1,7 @@
 import XCTest
-@testable import swift_sentry
+@testable import SwiftSentry
 
-final class swift_sentryTests: XCTestCase {
+final class SwiftSentryTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
