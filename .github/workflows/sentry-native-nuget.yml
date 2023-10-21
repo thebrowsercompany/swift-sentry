@@ -50,26 +50,26 @@ jobs:
       - name: Configure sentry-native (Windows)
         if: ${{ matrix.arch.platform == 'win64' }}
         run: |
-          cmake -B ${{ github.workspace }}\build\${{ matrix.arch.platform }} `
+          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
-                -S ${{ github.workspace }}\sentry-native `
+                -S ${{ github.workspace }}/sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A x64
       - name: Configure sentry-native
         run: |
-          cmake -B ${{ github.workspace }}\build\${{ matrix.arch.platform }} `
+          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
-                -S ${{ github.workspace }}\sentry-native `
+                -S ${{ github.workspace }}/sentry-native `
                 -A x64
 
       - name: Build sentry-native
-        run: cmake --build ${{ github.workspace }}\build\${{ matrix.arch.platform }} --parallel --config RelWithDebInfo
+        run: cmake --build ${{ github.workspace }}/build/${{ matrix.arch.platform }} --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install ${{ github.workspace }}\build\${{ matrix.arch.platform }} --prefix ${{ github.workspace }}\install\${{ matrix.arch.platform }} --config RelWithDebInfo
+        run: cmake --install ${{ github.workspace }}/build/${{ matrix.arch.platform }} --prefix ${{ github.workspace }}/install/${{ matrix.arch.platform }} --config RelWithDebInfo
 
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
-          path: ${{ github.workspace }}\install\${{ matrix.arch.platform }}
+          path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
