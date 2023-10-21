@@ -95,7 +95,7 @@ jobs:
         - name: Download Windows Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-win64
         - name: Download Linux Artifact
           uses: actions/download-artifact@v3
