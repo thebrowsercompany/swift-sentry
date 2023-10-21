@@ -1,12 +1,14 @@
 name: Package sentry-native Nuget
 
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       sentry-native-tag:
         type: string
         description: The tag of sentry-native to build
         required: true
+        default: "0.6.6"
       sentry-native-backend:
         type: choice
         options:
@@ -52,7 +54,7 @@ jobs:
         if: ${{ matrix.arch.platform == 'win64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
-                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} `
+                -D SENTRY_BACKEND=crashpad `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}/sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
@@ -62,7 +64,7 @@ jobs:
         if: ${{ matrix.arch.platform == 'macOS' || matrix.arch.platform == 'linux64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
-                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
+                -D SENTRY_BACKEND=crashpad \
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo \
                 -S ${{ github.workspace }}/sentry-native \
 
@@ -74,7 +76,7 @@ jobs:
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-crashpad
           path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
   create-nuget-package:
       needs: build-sentry-native
@@ -93,17 +95,17 @@ jobs:
         - name: Download Windows Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-win64
         - name: Download Linux Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-linux64
         - name: Download macOS Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-macOS
         - name: Create Nuget Package
           run: |
@@ -114,7 +116,7 @@ jobs:
                   -Properties WINDIR=${{ github.workspace }}\sentry-native-win64 `
                   -Properties LINUXDIR=${{ github.workspace }}\sentry-native-linux64 `
                   -Properties MACOSDIR=${{ github.workspace }}\sentry-native-macOS `
-                  -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+                  -Version 0.6.6-${treeish} `
         - name: Upload NuGet Package
           uses: actions/upload-artifact@v3
           with:
