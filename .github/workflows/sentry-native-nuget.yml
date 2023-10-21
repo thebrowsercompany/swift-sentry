@@ -78,7 +78,7 @@ jobs:
           path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
   create-nuget-package:
       needs: build-sentry-native
-      runs-on: [wnidows-latest]
+      runs-on: [windows-latest]
       steps:
         - name: Checkout sentry-native sources
           uses: actions/checkout@v4
