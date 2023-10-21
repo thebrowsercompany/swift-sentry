@@ -77,6 +77,7 @@ jobs:
           name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
           path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
   create-nuget-package:
+      needs: build-sentry-native
       runs-on: [wnidows-latest]
       steps:
         - name: Checkout sentry-native sources
