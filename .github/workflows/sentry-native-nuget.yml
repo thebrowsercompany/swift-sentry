@@ -20,9 +20,11 @@ jobs:
   package-nuget:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
-        arch: [macOS, win64]
-    runs-on: ${{ matrix.os }}
+        arch: [
+          { runner: macos-latest, platform: macOS},
+          { runner: windows-latest, platform: win64 }
+        ]
+    runs-on: ${{ matrix.arch.runner }}
     steps:
       - name: Checkout swift-sentry sources
         uses: actions/checkout@v4
@@ -38,7 +40,7 @@ jobs:
           submodules: 'recursive'
       # If we're running the Windows build we need to seutp Visual Studio
       - name: Setup Visual Studio
-        if: ${{ matrix.arch == 'win64' }}
+        if: ${{ matrix.arch.platform == 'win64' }}
         uses: compnerd/gha-setup-vsdevenv@main
         with:
           host_arch: arm64
@@ -47,18 +49,18 @@ jobs:
 
       - name: Configure sentry-native
         run: |
-          cmake -B ${{ github.workspace }}\build\${{ matrix.arch }} `
+          cmake -B ${{ github.workspace }}\build\${{ matrix.arch.platform }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}\sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A ${{ matrix.arch }}
       - name: Build sentry-native
-        run: cmake --build ${{ github.workspace }}\build\${{ matrix.arch }} --parallel --config RelWithDebInfo
+        run: cmake --build ${{ github.workspace }}\build\${{ matrix.arch.platform }} --parallel --config RelWithDebInfo
       - name: Install sentry-native
-        run: cmake --install ${{ github.workspace }}\build\${{ matrix.arch }} --prefix ${{ github.workspace }}\install\${{ matrix.arch }} --config RelWithDebInfo
+        run: cmake --install ${{ github.workspace }}\build\${{ matrix.arch.platform }} --prefix ${{ github.workspace }}\install\${{ matrix.arch.platform }} --config RelWithDebInfo
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: sentry-native-${{ matrix.arch }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
-          path: install\${{ matrix.arch }}
+          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+          path: ${{ github.workspace }}\install\${{ matrix.arch.platform }}
