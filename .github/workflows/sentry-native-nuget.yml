@@ -10,11 +10,12 @@ on:
       sentry-native-backend:
         type: choice
         options:
-          - INPROC
-          - CRASHPAD
-          - BREAKPAD
+          - crashpad
+          - breakpad
+          - inproc
+          - none
         required: true
-        default: CRASHPAD
+        default: crashpad
 
 jobs:
   package-nuget:
@@ -51,6 +52,7 @@ jobs:
         if: ${{ matrix.arch.platform == 'win64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
+                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}/sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
@@ -59,9 +61,9 @@ jobs:
       - name: Configure sentry-native
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
+                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo \
                 -S ${{ github.workspace }}/sentry-native \
-                -A x64
 
       - name: Build sentry-native
         run: cmake --build ${{ github.workspace }}/build/${{ matrix.arch.platform }} --parallel --config RelWithDebInfo
