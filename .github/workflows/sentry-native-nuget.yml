@@ -76,3 +76,46 @@ jobs:
         with:
           name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
           path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
+  create-nuget-package:
+      runs-on: [wnidows-latest]
+      steps:
+        - name: Checkout sentry-native sources
+          uses: actions/checkout@v4
+          with:
+            path: "swift-sentry"
+        - name: Setup Visual Studio
+          uses: compnerd/gha-setup-vsdevenv@main
+          with:
+            host_arch: arm64
+            components: 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
+            arch: amd64
+        - name: Download Windows Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-linux64
+        - name: Download Windows Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-linux64
+        - name: Download macOS Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-macOS
+        - name: Create Nuget Package
+          run: |
+            $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
+            nuget pack `
+                  -Properties `
+                    HEADERDIR=${{ github.workspace }}\sentry-native-win64\include `
+                    WINDIR=${{ github.workspace }}\sentry-native-win64 `
+                    LINUXDIR=${{ github.workspace }}\sentry-native-linux64 `
+                    MACOSDIR=${{ github.workspace }}\sentry-native-macOS `
+                  -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+                  ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
+        - name: Upload NuGet Package
+          uses: actions/upload-artifact@v3
+          with:
+            path: "*.nupkg"
