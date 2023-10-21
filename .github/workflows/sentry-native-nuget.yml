@@ -58,7 +58,8 @@ jobs:
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A x64
-      - name: Configure sentry-native
+      - name: Configure sentry-native (macOS)
+        if: ${{ matrix.arch.platform == 'macOS' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
                 -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
