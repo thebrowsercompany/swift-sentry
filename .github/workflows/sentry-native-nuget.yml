@@ -18,20 +18,16 @@ on:
         default: crashpad
 
 jobs:
-  package-nuget:
+  build-sentry-native:
     strategy:
       matrix:
         arch: [
           { runner: macos-latest, platform: macOS},
-          { runner: windows-latest, platform: win64 }
+          { runner: windows-latest, platform: win64 },
+          { runner: ubuntu-latest, platform: linux64 }
         ]
     runs-on: ${{ matrix.arch.runner }}
     steps:
-      - name: Checkout swift-sentry sources
-        uses: actions/checkout@v4
-        with:
-          path: "swift-sentry"
-
       - name: Checkout sentry-native sources
         uses: actions/checkout@v4
         with:
@@ -58,8 +54,8 @@ jobs:
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
                 -G "Visual Studio 17 2022" `
                 -A x64
-      - name: Configure sentry-native (macOS)
-        if: ${{ matrix.arch.platform == 'macOS' }}
+      - name: Configure sentry-native (macOS & Linux)
+        if: ${{ matrix.arch.platform == 'macOS' || matrix.arch.platform == 'linux64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
                 -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
