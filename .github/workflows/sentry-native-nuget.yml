@@ -76,7 +76,7 @@ jobs:
       - name: Upload Install Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-crashpad
           path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
   create-nuget-package:
       needs: build-sentry-native
@@ -100,12 +100,12 @@ jobs:
         - name: Download Linux Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-linux64
         - name: Download macOS Artifact
           uses: actions/download-artifact@v3
           with:
-            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-crashpad
             path: sentry-native-macOS
         - name: Create Nuget Package
           run: |
