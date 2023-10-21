@@ -21,11 +21,11 @@
         <file src="$WINDIR$\bin\sentry.pdb" target="debug\win64"/>
         <file src="$WINDIR$\lib\sentry.lib" target="lib\win64"/>
         <!-- Linux Files-->
-        <file src="$LINUXDIR$\bin\crashpad_handler" target="bin\linux64"/>
+        <file src="$LINUXDIR$\bin\crashpad_handler" target="bin\linux64\crashpad_handler"/>
         <file src="$LINUXDIR$\lib\libsentry.so" target="lib\linux64"/>
         <!-- macOS Files -->
-        <file src="$MACOSDIR$\bin\crashpad_handler" target="bin\macOS"/>
+        <file src="$MACOSDIR$\bin\crashpad_handler" target="bin\macOS\crashpad_handler"/>
         <file src="$MACOSDIR$\lib\libsentry.dylib" target="lib\macOS"/>
-        <file src="$MACOSDIR$\lib\libsentry.dylib.dSYM" target="debug\macOS"/>
+        <file src="$MACOSDIR$\lib\libsentry.dylib.dSYM\**" target="debug\macOS\libsentry.dylib.dSYM"/>
     </files>
 </package>
