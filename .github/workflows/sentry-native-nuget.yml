@@ -58,9 +58,9 @@ jobs:
                 -A x64
       - name: Configure sentry-native
         run: |
-          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
-                -D CMAKE_BUILD_TYPE=RelWithDebInfo `
-                -S ${{ github.workspace }}/sentry-native `
+          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
+                -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+                -S ${{ github.workspace }}/sentry-native \
                 -A x64
 
       - name: Build sentry-native
