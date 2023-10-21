@@ -44,6 +44,10 @@ jobs:
           components: 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
           arch: amd64
 
+      - name: Install libcurl4-openssl-dev (Linux)
+        if: ${{ matrix.arch.platform == 'linux64' }}
+        run: sudo apt install -y libcurl4-openssl-dev
+
       - name: Configure sentry-native (Windows)
         if: ${{ matrix.arch.platform == 'win64' }}
         run: |
