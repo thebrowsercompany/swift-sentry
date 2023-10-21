@@ -95,7 +95,7 @@ jobs:
           with:
             name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
             path: sentry-native-win64
-        - name: Download Windows Artifact
+        - name: Download Linux Artifact
           uses: actions/download-artifact@v3
           with:
             name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
@@ -109,13 +109,13 @@ jobs:
           run: |
             $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
             nuget pack `
+                  ${{ github.workspace }}\swift-sentry\sentry-native.nuspec `
                   -Properties `
-                    HEADERDIR=${{ github.workspace }}\sentry-native-win64\include:`
-                    WINDIR=${{ github.workspace }}\sentry-native-win64:`
-                    LINUXDIR=${{ github.workspace }}\sentry-native-linux64:`
+                    HEADERDIR=${{ github.workspace }}\sentry-native-win64;`
+                    WINDIR=${{ github.workspace }}\sentry-native-win64;`
+                    LINUXDIR=${{ github.workspace }}\sentry-native-linux64;`
                     MACOSDIR=${{ github.workspace }}\sentry-native-macOS `
                   -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
-                  ${{ github.workspace }}\swift-sentry\sentry-native.nuspec
         - name: Upload NuGet Package
           uses: actions/upload-artifact@v3
           with:
