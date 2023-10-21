@@ -54,7 +54,7 @@ jobs:
         if: ${{ matrix.arch.platform == 'win64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
-                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} `
+                -D SENTRY_BACKEND=crashpad `
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo `
                 -S ${{ github.workspace }}/sentry-native `
                 -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
@@ -64,7 +64,7 @@ jobs:
         if: ${{ matrix.arch.platform == 'macOS' || matrix.arch.platform == 'linux64' }}
         run: |
           cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
-                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
+                -D SENTRY_BACKEND=crashpad \
                 -D CMAKE_BUILD_TYPE=RelWithDebInfo \
                 -S ${{ github.workspace }}/sentry-native \
 
