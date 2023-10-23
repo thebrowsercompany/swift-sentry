@@ -45,7 +45,8 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftSentryTests",
-            dependencies: ["SwiftSentry"]
+            dependencies: ["SwiftSentry"],
+            swiftSettings: swiftSettings
         ),
     ]
 )

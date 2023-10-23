@@ -10,6 +10,8 @@ struct MacOSExample {
     defer { Sentry.close() }
 
     print("Hello macOS")
+
+    RunLoop.current.run()
   }
 
   static func startSentry() {
