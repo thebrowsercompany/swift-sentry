@@ -57,7 +57,7 @@ public enum Sentry {
     public static func setUser(_ user: User?) {
         guard let user else {
             // If a nil user is set, we clear out the user on Sentry.
-            sentry_set_user(sentry_value_new_null())
+            sentry_remove_user()
             return
         }
 
