@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
+import AppKit
 import Foundation
 import SwiftSentry
 
 @main
 enum MacOSExample {
+
     static func main() {
+        let app = NSApplication.shared
         startSentry()
         defer { Sentry.close() }
 
         print("Hello macOS")
 
-        RunLoop.current.run()
+        app.run()
     }
 
     static func startSentry() {

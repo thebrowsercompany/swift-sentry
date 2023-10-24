@@ -8,6 +8,7 @@ struct BreadcrumbNestedSerialization: Codable {
 
     let category: String
     let level: String
+    let message: String
     let data: BreadcrumbDataTest
 }
 
@@ -18,6 +19,7 @@ struct BreadcrumbNestedLists: Codable {
 
     let category: String
     let level: String
+    let message: String
     let data: BreadcrumbDataTest
 }
 
@@ -28,5 +30,6 @@ struct BreadcrumbNestedObject: Codable {
 
     let category: String
     let level: String
+    let message: String
     let data: BreadcrumbDataTest
 }

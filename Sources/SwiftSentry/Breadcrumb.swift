@@ -29,7 +29,6 @@ extension Breadcrumb: SentryValueSerializable {
         sentry_value_set_by_key(crumb, "category", sentry_value_new_string(category.cString(using: .utf8)))
         sentry_value_set_by_key(crumb, "level", sentry_value_new_string(level.description.cString(using: .utf8)))
         sentry_value_set_by_key(crumb, "timestamp", sentry_value_new_double(timestamp.timeIntervalSince1970))
-        sentry_value_set_by_key(crumb, "message", sentry_value_new_string(message.cString(using: .utf8)))
 
         if let data {
             var object = sentry_value_new_object()

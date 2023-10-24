@@ -34,6 +34,4 @@ extension SentryLevel: CustomStringConvertible {
             return "unknown"
         }
     }
-    
-
 }
