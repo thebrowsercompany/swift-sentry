@@ -64,6 +64,10 @@ public enum Sentry {
         sentry_set_user(user.serialized())
     }
 
+    public static func addBreadcrumb(_ breadcrumb: Breadcrumb) {
+        sentry_add_breadcrumb(breadcrumb.serialized())
+    }
+
     public static func close() {
         sentry_close()
     }
