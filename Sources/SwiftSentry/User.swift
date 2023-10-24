@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: BSD-3-Clause
-import Foundation
-
 /// The representation of a user which should be attached to subsequent events.
 public struct User {
     var userId: String?
@@ -19,7 +17,7 @@ public struct User {
 }
 
 extension User: SentryValueSerializable {
-    func serialized() -> sentry_value_t {
+    internal func serialized() -> sentry_value_t {
         let sentryUser = sentry_value_new_object()
         if let id = userId {
             sentry_value_set_by_key(sentryUser, "id", sentry_value_new_string(id.cString(using: .utf8)))
