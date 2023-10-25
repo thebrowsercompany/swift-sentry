@@ -37,7 +37,7 @@ public struct SentryId {
   }
 
   func sentryIdString() -> String {
-    return uuid.uuidString.replacingOccurrences(of: "-", with: "")
+    return uuid.uuidString.lowercased().replacingOccurrences(of: "-", with: "")
   }
 }
 
@@ -58,5 +58,4 @@ internal extension SentryId {
     sentry_uuid_as_string(&mutableSentryUUID, &cString)
     self.uuid = UUID(uuidString: String(cString: cString)) ?? .empty
   }
-
 }

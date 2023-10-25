@@ -27,7 +27,8 @@ final class SentryIdTests: XCTestCase {
   func testDashesAreHandledCorrectly() {
     let uuid = "12c2d058-d584-4270-9aa2-eca08bf20986"
     let id = SentryId(UUIDString: uuid)
+    let strippedUUID = "12c2d058d58442709aa2eca08bf20986"
 
-    XCTAssertEqual(id.sentryIdString(), uuid, "UUID strings with dashes should be handled correctly.")
+    XCTAssertEqual(id.sentryIdString(), strippedUUID, "UUID strings with dashes should be handled correctly.")
   }
 }
