@@ -1,0 +1,4 @@
+[*.swift]
+indent_size = 2
+indent_stype = space
+charset = utf-8
