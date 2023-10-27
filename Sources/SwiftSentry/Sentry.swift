@@ -68,6 +68,12 @@ public enum Sentry {
         sentry_add_breadcrumb(breadcrumb.serialized())
     }
 
+    public static func capture(event: Event) -> SentryId {
+        let id = sentry_capture_event(event.serialized())
+
+        return SentryId(value: id)
+    }
+
     public static func close() {
         sentry_close()
     }
