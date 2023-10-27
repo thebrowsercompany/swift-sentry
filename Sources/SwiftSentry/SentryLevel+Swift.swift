@@ -10,11 +10,11 @@ public typealias SentryLevel = sentry_level_t
 /// this level. The native SDK does not support this level, so it
 /// is notably missing here.
 extension SentryLevel {
-    public static var debug: Self { SENTRY_LEVEL_DEBUG }
-    public static var info: Self { SENTRY_LEVEL_INFO }
-    public static var warning: Self { SENTRY_LEVEL_WARNING }
-    public static var error: Self { SENTRY_LEVEL_ERROR }
-    public static var fatal: Self { SENTRY_LEVEL_FATAL }
+    public static let debug = SENTRY_LEVEL_DEBUG
+    public static let info = SENTRY_LEVEL_INFO
+    public static let warning = SENTRY_LEVEL_WARNING
+    public static let error = SENTRY_LEVEL_ERROR
+    public static let fatal = SENTRY_LEVEL_FATAL
 }
 
 extension SentryLevel: CustomStringConvertible {
