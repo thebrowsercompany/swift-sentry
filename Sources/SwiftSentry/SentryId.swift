@@ -6,7 +6,7 @@ import Foundation
 /// "12c2d058d58442709aa2eca08bf20986" or 36 character strings with dashes
 /// "12c2d058-d584-4270-9aa2-eca08bf20986".
 /// - note: It is recommended to omit dashes and use UUID v4 in cases.
-public struct SentryId {
+public struct SentryId: CustomStringConvertible {
   private let uuid: Foundation.UUID
 
   public init() {
@@ -36,8 +36,13 @@ public struct SentryId {
     self.uuid = uuid
   }
 
-  func sentryIdString() -> String {
+  public func sentryIdString() -> String {
     return uuid.uuidString.lowercased().replacingOccurrences(of: "-", with: "")
+  }
+
+  // MARK: - CustomStringConvertible
+  public var description: String {
+    return sentryIdString()
   }
 }
 
