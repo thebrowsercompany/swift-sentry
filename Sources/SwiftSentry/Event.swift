@@ -3,11 +3,11 @@ import Foundation
 
 public struct Event {
   let eventId = SentryId()
-  var message: String?
+  public var message: String?
   let timestamp: Date = Date()
   let level: SentryLevel
   let platform: String = Event.platform()
-  var tags: [String: String]?
+  public var tags: [String: String]?
 
   public init(level: SentryLevel) {
     self.level = level
