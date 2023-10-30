@@ -5,15 +5,35 @@ import sentry
 
 import Foundation
 
-public enum Sentry {
-    @MainActor
+public enum SentrySDK {
+    /// Whether or not the application crashed during it's last run.
+    /// - note: This value is only accurate after the SDK have been initialized.
+    public static var crashedLastRun: Bool {
+        switch sentry_get_crashed_last_run() {
+            case 0:
+            return false
+            case 1:
+            return true
+            case -1:
+            // Since the Cocoa SDK expects a boolean value, and tri-bools aren't available
+            // we default to returning false if the SDK hasn't been initialized yet.
+            return false
+            default:
+            return false
+        }
+    }
+    /// Starts the SDK after passing in a closure to configure the options in the SDK.
+    /// - note: This should be called on the main thread/actor, but the annotation is
+    /// specifically not present to preserve cross-platform compatibility.
     public static func start(_ configureOptions: (inout Options) -> Void) {
         var options = Options()
         configureOptions(&options)
         start(options)
     }
 
-    @MainActor
+    /// Starts the SDK after passing in a closure to configure the options in the SDK.
+    /// - note: This should be called on the main thread/actor, but the annotation is
+    /// specifically not present to preserve cross-platform compatibility.
     public static func start(_ options: Options) {
         guard !options.dsn.isEmpty else {
             fatalError("Sentry DSN must not be empty!")

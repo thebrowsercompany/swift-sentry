@@ -13,13 +13,13 @@ final class SentryExampleWin: ApplicationDelegate {
   }
 
   func applicationWillTerminate(_: Application) {
-    Sentry.close()
+    SentrySDK.close()
   }
 
   func startSentry() {
     print("Spinning up task to start Sentry")
     Task { @MainActor in
-      Sentry.start { options in
+      SentrySDK.start { options in
         options.dsn = SentryConfiguration.dsn
         options.environment = "Debug"
         options.debug = true

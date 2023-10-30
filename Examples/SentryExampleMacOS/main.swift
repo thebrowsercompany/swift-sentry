@@ -6,7 +6,6 @@ import SwiftSentry
 
 @main
 enum MacOSExample {
-
     static func main() {
         let app = NSApplication.shared
         startSentry()
@@ -19,7 +18,7 @@ enum MacOSExample {
 
     static func startSentry() {
         Task { @MainActor in
-            Sentry.start { options in
+            SentrySDK.start { options in
                 options.dsn = "your-dsn-goes-here"
                 options.debug = true
             }

@@ -26,6 +26,8 @@ final class SentryExampleViewController: ViewController {
     badIndexButton.addTarget(self, action: SentryExampleViewController.badIndexAction,
                              for: .primaryActionTriggered)
 
+    print("App Crashed last session? \(SentrySDK.crashedLastRun)")
+
     layoutViews()
   }
 
