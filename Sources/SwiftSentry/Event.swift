@@ -2,12 +2,14 @@
 import Foundation
 
 public struct Event {
-  let eventId = SentryId()
-  var message: String?
-  let timestamp: Date = Date()
-  let level: SentryLevel
-  let platform: String = Event.platform()
-  var tags: [String: String]?
+  public let eventId = SentryId()
+  public var message: String?
+  public var eventType: String?
+  public let timestamp: Date = Date()
+  public let level: SentryLevel
+  public let platform: String = Event.platform()
+  public var tags: [String: String]?
+  public var extra: [String: String]?
 
   public init(level: SentryLevel) {
     self.level = level
@@ -30,8 +32,18 @@ extension Event: SentryValueSerializable {
       sentry_value_set_by_key(event, "tags", tagObject)
     }
 
+    if let extra {
+      var extraObject = sentry_value_new_object()
+      parse(value: &extraObject, object: extra)
+      sentry_value_set_by_key(event, "extra", extraObject)
+    }
+
     if let message {
       sentry_value_set_by_key(event, "message", sentry_value_new_string(message.cString(using: .utf8)))
+    }
+
+    if let type {
+      sentry_value_set_by_key(event, "type", sentry_value_new_string(type.cString(using: .utf8)))
     }
 
     return event
