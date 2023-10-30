@@ -5,15 +5,19 @@ import sentry
 
 import Foundation
 
-public enum Sentry {
-    @MainActor
+public enum SentrySDK {
+    /// Starts the SDK after passing in a closure to configure the options in the SDK.
+    /// - note: This should be called on the main thread/actor, but the annotation is
+    /// specifically not present to preserve cross-platform compatibility.
     public static func start(_ configureOptions: (inout Options) -> Void) {
         var options = Options()
         configureOptions(&options)
         start(options)
     }
 
-    @MainActor
+    /// Starts the SDK after passing in a closure to configure the options in the SDK.
+    /// - note: This should be called on the main thread/actor, but the annotation is
+    /// specifically not present to preserve cross-platform compatibility.
     public static func start(_ options: Options) {
         guard !options.dsn.isEmpty else {
             fatalError("Sentry DSN must not be empty!")
