@@ -4,7 +4,7 @@ import Foundation
 public struct Event {
   public let eventId = SentryId()
   public var message: String?
-  public var type: String?
+  public var eventType: String?
   public let timestamp: Date = Date()
   public let level: SentryLevel
   public let platform: String = Event.platform()
