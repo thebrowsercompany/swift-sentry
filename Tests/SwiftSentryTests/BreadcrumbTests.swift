@@ -9,6 +9,12 @@ final class BreadcrumbTests: XCTestCase {
         XCTAssertTrue(sentry_value_is_null(serialized) == 1)
     }
 
+    func testBreadcrumbDefaultInitializer() throws {
+        let crumb = Breadcrumb()
+        XCTAssertEqual(crumb.level, SentryLevel.info, "Default level should be info.")
+        XCTAssertEqual(crumb.category, "default", "Default category should be 'default'.")
+    }
+
     func testNestedDataSerializedCorrectly() throws {
         var crumb = Breadcrumb(withLevel: .debug, category: "http")
         crumb.message = "hi"
