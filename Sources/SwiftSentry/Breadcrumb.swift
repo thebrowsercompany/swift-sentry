@@ -12,7 +12,7 @@ public struct Breadcrumb {
     public var message: String?
     public var data: [String: Any]?
 
-    public init(withLevel level: SentryLevel, category: String) {
+    public init(withLevel level: SentryLevel = .info, category: String = "default") {
         self.level = level
         self.category = category
     }
