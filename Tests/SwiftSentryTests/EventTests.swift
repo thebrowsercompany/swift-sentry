@@ -6,6 +6,7 @@ final class EventTests: XCTestCase {
   func testBasicEventGetsSerialized() throws {
     var event = Event(level: .info)
     event.message = "(❁´◡`❁)"
+    event.eventType = "message"
 
     let deserialized =  try JSONDecoder().decode(EventTestBasicEventSerialization.self, from: event.jsonData())
 
