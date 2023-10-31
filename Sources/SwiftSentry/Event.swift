@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 import Foundation
 
-public struct Event {
+public final class Event {
   public let eventId = SentryId()
   public var message: String?
   public var eventType: String?

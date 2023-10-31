@@ -4,7 +4,7 @@ import sentry
 import Foundation
 
 /// A small piece of timestamped textual information that will accompany subsequent events.
-public struct Breadcrumb {
+public final class Breadcrumb {
     public var level: SentryLevel
     public var category: String
     public var timestamp: Date = .init()

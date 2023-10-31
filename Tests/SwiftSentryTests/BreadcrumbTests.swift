@@ -16,7 +16,7 @@ final class BreadcrumbTests: XCTestCase {
     }
 
     func testNestedDataSerializedCorrectly() throws {
-        var crumb = Breadcrumb(withLevel: .debug, category: "http")
+        let crumb = Breadcrumb(withLevel: .debug, category: "http")
         crumb.message = "hi"
 
         crumb.data = [
@@ -42,7 +42,7 @@ final class BreadcrumbTests: XCTestCase {
     }
 
     func testNestedListsSerializeCorrectly() throws {
-        var crumb = Breadcrumb(withLevel: .debug, category: "http")
+        let crumb = Breadcrumb(withLevel: .debug, category: "http")
         crumb.message = "hi"
 
         crumb.data = [
@@ -58,7 +58,7 @@ final class BreadcrumbTests: XCTestCase {
     }
 
     func testNestedDictionariesSerializeCorrectly() throws {
-        var crumb = Breadcrumb(withLevel: .debug, category: "http")
+        let crumb = Breadcrumb(withLevel: .debug, category: "http")
         crumb.message = "hi"
 
         crumb.data = [
