@@ -42,8 +42,8 @@ extension Event: SentryValueSerializable {
       sentry_value_set_by_key(event, "message", sentry_value_new_string(message.cString(using: .utf8)))
     }
 
-    if let type {
-      sentry_value_set_by_key(event, "type", sentry_value_new_string(type.cString(using: .utf8)))
+    if let eventType {
+      sentry_value_set_by_key(event, "type", sentry_value_new_string(eventType.cString(using: .utf8)))
     }
 
     return event
