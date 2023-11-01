@@ -4,7 +4,7 @@ import XCTest
 
 final class EventTests: XCTestCase {
   func testBasicEventGetsSerialized() throws {
-    var event = Event(level: .info)
+    let event = Event(level: .info)
     event.message = "(❁´◡`❁)"
     event.eventType = "message"
 
@@ -23,7 +23,7 @@ final class EventTests: XCTestCase {
   }
 
   func testEventWithTagsGetsSerialized() throws {
-    var event = Event(level: .warning)
+    let event = Event(level: .warning)
     event.tags = [
       "one": "valueOne",
       "two": "valueTwo"
