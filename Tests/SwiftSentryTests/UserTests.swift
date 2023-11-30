@@ -23,4 +23,14 @@ final class SwiftSentryTests: XCTestCase {
             XCTAssertEqual(value, group.1, "Expected value of '\(group.0)' to be '\(group.1)'; got '\(value)'")
         }
     }
+
+    func testCanMutateValuesAfterInitialization() throws {
+      let user = User()
+
+      XCTAssertNil(user.email)
+
+      user.email = "gritty@arc.net"
+
+      XCTAssertEqual(user.email, "gritty@arc.net")
+    }
 }
