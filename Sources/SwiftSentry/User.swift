@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /// The representation of a user which should be attached to subsequent events.
-public struct User {
-    var userId: String?
-    var email: String?
-    var username: String?
+public final class User {
+    public var userId: String?
+    public var email: String?
+    public var username: String?
 
     public init(
         userId: String? = nil,
