@@ -49,9 +49,14 @@ public enum SentrySDK {
             fatalError("Unable to find caches directory for storing Sentry reports!")
         }
 
+        // Use the dsn + environment to create some variability in the hash
+        // to put the same app running in different environments in different
+        // places on disk to avoid any potential contention.
+        let applicationHash = "\(options.dsn)\(options.environment)".hash
+
         let sentryCachePath = cachePath
             .appendingPathComponent("io.sentry")
-            .appendingPathComponent(String(options.dsn.hash))
+            .appendingPathComponent(String(applicationHash))
             .path
 
         sentry_options_set_database_path(o, sentryCachePath.cString(using: .utf8))
