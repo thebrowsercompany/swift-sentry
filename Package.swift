@@ -76,7 +76,9 @@ package.products += [
     )
 ]
 package.dependencies += [
-    .package(url: "https://github.com/compnerd/swift-win32", branch: "main"),
+    // This revision is important since it's the first one before the swift-win32 repo moved to versioned symlinks
+    // for different swift-tools-versions.
+    .package(url: "https://github.com/compnerd/swift-win32", revision: "07e91e67e86f173743329c6753d9e66ac4727830"),
 ]
 package.targets += [
     .executableTarget(
