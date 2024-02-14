@@ -20,7 +20,7 @@
         <key>SceneConfigurationName</key>
         <string>Default Configuration</string>
         <key>SceneDelegateClassName</key>
-        <string>SentryExample.SceneDelegate</string>
+        <string>SentryExampleWin.SceneDelegate</string>
       </dict>
     </array>
     </dict>
