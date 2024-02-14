@@ -20,6 +20,13 @@ clientLinkerSettings += platforms.map {
     .unsafeFlags(["\(linkerBase)/\($0.0)"], .when(platforms: [$0.1]))
 }
 
+let guiLinkerSettings: [LinkerSetting] = [
+    .unsafeFlags(["-Xlinker", "/SUBSYSTEM:WINDOWS"], .when(configuration: .release)),
+    // Update the entry point to point to the generated swift function, this lets us keep the same main method
+    // for debug/release
+    .unsafeFlags(["-Xlinker", "/ENTRY:mainCRTStartup"], .when(configuration: .release)),
+]
+
 let package = Package(
     name: "swift-sentry",
     platforms: [
@@ -79,6 +86,8 @@ package.dependencies += [
     // This revision is important since it's the first one before the swift-win32 repo moved to versioned symlinks
     // for different swift-tools-versions.
     .package(url: "https://github.com/compnerd/swift-win32", revision: "07e91e67e86f173743329c6753d9e66ac4727830"),
+    .package(url: "https://github.com/thebrowsercompany/swift-winui", branch: "main"),
+    .package(url: "https://github.com/thebrowsercompany/swift-windowsappsdk", branch: "main"),
 ]
 package.targets += [
     .executableTarget(
@@ -89,6 +98,17 @@ package.targets += [
         ],
         path: "Examples/SentryExampleWin",
         swiftSettings: swiftSettings + [.unsafeFlags(["-parse-as-library"])]
+    ),
+    .executableTarget(
+        name: "SentryExampleWinUI",
+        dependencies: [
+            "SwiftSentry",
+            .product(name: "WinUI", package: "swift-winui"),
+            .product(name: "WinUIExt", package: "swift-winui"),
+        ],
+        path: "Examples/SentryExampleWinUI",
+        swiftSettings: swiftSettings + [.unsafeFlags(["-parse-as-library"])],
+        linkerSettings: guiLinkerSettings
     ),
 ]
 #endif
