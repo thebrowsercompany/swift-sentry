@@ -86,6 +86,7 @@ package.dependencies += [
     // This revision is important since it's the first one before the swift-win32 repo moved to versioned symlinks
     // for different swift-tools-versions.
     .package(url: "https://github.com/compnerd/swift-win32", revision: "07e91e67e86f173743329c6753d9e66ac4727830"),
+    .package(url: "https://github.com/thebrowsercompany/swift-windowsfoundation", branch: "main"),
     .package(url: "https://github.com/thebrowsercompany/swift-winui", branch: "main"),
     .package(url: "https://github.com/thebrowsercompany/swift-windowsappsdk", branch: "main"),
 ]
@@ -105,6 +106,7 @@ package.targets += [
             "SwiftSentry",
             .product(name: "WinUI", package: "swift-winui"),
             .product(name: "WinUIExt", package: "swift-winui"),
+            .product(name: "WindowsFoundation", package: "swift-windowsfoundation"),
         ],
         path: "Examples/SentryExampleWinUI",
         swiftSettings: swiftSettings + [.unsafeFlags(["-parse-as-library"])],
