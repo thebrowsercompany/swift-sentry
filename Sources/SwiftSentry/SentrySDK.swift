@@ -45,20 +45,7 @@ public enum SentrySDK {
         sentry_options_set_symbolize_stacktraces(o, options.attachStacktrace ? 1 : 0)
         sentry_options_set_environment(o, options.environment.cString(using: .utf8))
 
-        guard let cachePath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
-            fatalError("Unable to find caches directory for storing Sentry reports!")
-        }
-
-        // Use the dsn + environment to create some variability in the hash
-        // to put the same app running in different environments in different
-        // places on disk to avoid any potential contention.
-        var hasher = Hasher()
-        [options.dsn, options.environment].hash(into: &hasher)
-
-        let sentryCachePath = cachePath
-            .appendingPathComponent("io.sentry")
-            .appendingPathComponent(String(hasher.finalize()))
-            .path
+        let sentryCachePath = getCachePath(for: options)
 
         sentry_options_set_database_path(o, sentryCachePath.cString(using: .utf8))
 
@@ -102,5 +89,24 @@ public enum SentrySDK {
 
     public static func close() {
         sentry_close()
+    }
+
+    internal static func getCachePath(for options: Options) -> String {
+      guard let basePath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+        fatalError("Unable to find caches directory for storing Sentry reports!")
+      }
+
+      // Use the dsn + environment to create some variability in the hash
+      // to put the same app running in different environments in different
+      // places on disk to avoid any potential contention. We can't use a
+      // simple `Hasher` since it's values are not stable across launches.
+      let hashed = Data("\(options.dsn)\(options.environment)".utf8).SHA1.hexString
+
+      let cachePath = basePath
+          .appendingPathComponent("io.sentry")
+          .appendingPathComponent(hashed)
+          .path
+
+      return cachePath
     }
 }
