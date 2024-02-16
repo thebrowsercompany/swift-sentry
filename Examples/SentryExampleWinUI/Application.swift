@@ -12,13 +12,25 @@ public class SentryApplication: SwiftApplication {
 
     required public init() {
         super.init()
-        m_window.title = "SwiftSentry Example WinUI App"
         unhandledException.addHandler { (_, args:UnhandledExceptionEventArgs!) in
             print("Unhandled exception: \(args.message)")
         }
     }
 
+    private var failAsync: Bool = false
+
+    private func failWith(_ failWith: @escaping @autoclosure() -> Void) {
+        if failAsync {
+            DispatchQueue.main.async {
+                failWith()
+            }
+        } else {
+            failWith()
+        }
+    }
+
     override public func onLaunched(_ args: WinUI.LaunchActivatedEventArgs) {
+        m_window.title = "SwiftSentry Example WinUI App"
         startSentry()
 
         try! m_window.activate()
@@ -33,6 +45,12 @@ public class SentryApplication: SwiftApplication {
         panel.horizontalAlignment = .center
         panel.verticalAlignment = .center
 
+        let checkBox = CheckBox()
+        checkBox.content = "Fail in Async callback"
+        checkBox.checked.addHandler { [weak self] _, _ in self?.failAsync = true }
+        checkBox.unchecked.addHandler { [weak self] _, _ in self?.failAsync = false }
+
+        panel.children.append(checkBox)
         panel.children.append(makeButton("abort()") { abort() })
         panel.children.append(makeButton("fatalError()") { fatalError("Boom goes the dynamite!") })
         panel.children.append(makeButton("[0][1]") { _ = [0][1] })
@@ -44,8 +62,8 @@ public class SentryApplication: SwiftApplication {
     private func makeButton(_ content: String, onClick: @escaping () -> Void) -> Button {
         let button = Button()
         button.content = content
-        button.click.addHandler { _, _ in
-            onClick()
+        button.click.addHandler { [weak self] _, _ in
+            self?.failWith(onClick())
         }
         return button
     }
