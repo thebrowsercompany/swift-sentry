@@ -69,8 +69,31 @@
       "args": [],
       "cwd": "${workspaceFolder:swift-sentry}",
       "name": "Release SentryExampleWin",
-      "program": "${workspaceFolder:swift-sentry}\\.build\\release\\SentryExampleWin.exe",
-      "preLaunchTask": "swift: Build Release SentryExampleWin"
+      "program": "${workspaceFolder:swift-sentry}\\.build\\release\\SentryExampleWin.exe"
+    },
+    {
+      "type": "swift-lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:swift-sentry}",
+      "name": "Debug SentryExampleWinUI",
+      "program": "${workspaceFolder:swift-sentry}\\.build\\debug\\SentryExampleWinUI.exe",
+      "preLaunchTask": "swift: Build Debug SentryExampleWinUI"
+    },
+    {
+      "type": "swift-lldb",
+      "request": "launch",
+      "sourceLanguages": [
+        "swift"
+      ],
+      "args": [],
+      "cwd": "${workspaceFolder:swift-sentry}",
+      "name": "Release SentryExampleWinUI",
+      "program": "${workspaceFolder:swift-sentry}\\.build\\release\\SentryExampleWinUI.exe",
+      "preLaunchTask": "swift: Build Release SentryExampleWinUI"
     }
   ]
 }
