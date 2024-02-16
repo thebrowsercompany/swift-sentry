@@ -10,3 +10,7 @@ DerivedData/
 Package.resolved
 /vendor
 *.nupkg
+
+installer/*.dll
+installer/*.exe*
+installer/Info.plist
