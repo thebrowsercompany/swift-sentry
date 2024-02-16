@@ -12,13 +12,13 @@ public class SentryApplication: SwiftApplication {
 
     required public init() {
         super.init()
-        m_window.title = "SwiftSentry Example WinUI App"
         unhandledException.addHandler { (_, args:UnhandledExceptionEventArgs!) in
             print("Unhandled exception: \(args.message)")
         }
     }
 
     override public func onLaunched(_ args: WinUI.LaunchActivatedEventArgs) {
+        m_window.title = "SwiftSentry Example WinUI App"
         startSentry()
 
         try! m_window.activate()
