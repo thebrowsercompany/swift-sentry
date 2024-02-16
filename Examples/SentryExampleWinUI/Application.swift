@@ -1,15 +1,16 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
 import Foundation
 import SwiftSentry
 import UWP
 import WinSDK
 import WinUI
-import WinUIExt
 
 @main
 public class SentryApplication: SwiftApplication {
     lazy var m_window: Window = .init()
 
-    override required public init() {
+    required public init() {
         super.init()
         m_window.title = "SwiftSentry Example WinUI App"
         unhandledException.addHandler { (_, args:UnhandledExceptionEventArgs!) in
@@ -17,34 +18,10 @@ public class SentryApplication: SwiftApplication {
         }
     }
 
-    private func makeButton(_ content: String, onClick: @escaping () -> Void) -> Button {
-        let button = Button()
-        button.content = content
-        button.click.addHandler { _, _ in
-            onClick()
-        }
-        return button
-    }
-
-    func startSentry() {
-        print("Spinning up task to start Sentry")
-        Task { @MainActor in
-            SentrySDK.start { options in
-                options.dsn = SentryConfiguration.dsn
-                options.path = "SentryExampleWin"
-                options.environment = "Debug"
-                options.debug = true
-
-                print("Release: \(String(describing: options.releaseName))")
-            }
-        }
-    }
-
-    override public func onLaunched(_ args: WinUI.LaunchActivatedEventArgs?) throws {
+    override public func onLaunched(_ args: WinUI.LaunchActivatedEventArgs) {
         startSentry()
-        resources.mergedDictionaries.append(XamlControlsResources())
 
-        try m_window.activate()
+        try! m_window.activate()
 
         m_window.closed.addHandler { _, _ in
             SentrySDK.close()
@@ -62,5 +39,27 @@ public class SentryApplication: SwiftApplication {
         panel.children.append(makeButton("RaiseFailFastException()") { RaiseFailFastException(nil, nil, 0) })
 
         m_window.content = panel
+    }
+
+    private func makeButton(_ content: String, onClick: @escaping () -> Void) -> Button {
+        let button = Button()
+        button.content = content
+        button.click.addHandler { _, _ in
+            onClick()
+        }
+        return button
+    }
+
+    func startSentry() {
+        print("Spinning up task to start Sentry")
+        Task { @MainActor in
+            SentrySDK.start { options in
+                options.dsn = SentryConfiguration.dsn
+                options.environment = "Debug"
+                options.debug = true
+
+                print("Release: \(String(describing: options.releaseName))")
+            }
+        }
     }
 }
