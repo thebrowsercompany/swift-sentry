@@ -11,6 +11,5 @@ Package.resolved
 /vendor
 *.nupkg
 
-installer/*.dll
-installer/*.exe*
-installer/Info.plist
+installer/LayoutRoot/*
+installer/SwiftSentry.msix
