@@ -5,6 +5,19 @@ import SwiftSentry
 import UWP
 import WinSDK
 import WinUI
+import WindowsFoundation
+
+class StowedExceptionButton: Button {
+
+    override init() {
+        super.init()
+        self.content = "Stowed Exception"
+    }
+
+    override func onPointerPressed(_ e: PointerRoutedEventArgs!) throws {
+        throw Error(hr: E_FAIL)
+    }
+}
 
 @main
 public class SentryApplication: SwiftApplication {
@@ -14,6 +27,7 @@ public class SentryApplication: SwiftApplication {
         super.init()
         unhandledException.addHandler { (_, args:UnhandledExceptionEventArgs!) in
             print("Unhandled exception: \(args.message)")
+            fflush(stdout)
         }
     }
 
@@ -55,6 +69,8 @@ public class SentryApplication: SwiftApplication {
         panel.children.append(makeButton("fatalError()") { fatalError("Boom goes the dynamite!") })
         panel.children.append(makeButton("[0][1]") { _ = [0][1] })
         panel.children.append(makeButton("RaiseFailFastException()") { RaiseFailFastException(nil, nil, 0) })
+        panel.children.append(StowedExceptionButton())
+
 
         m_window.content = panel
     }
