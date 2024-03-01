@@ -53,6 +53,10 @@ public enum SentrySDK {
             sentry_options_set_debug(o, 1)
         }
 
+        if let handlerPath = options.crashHandlerPath {
+          sentry_options_set_handler_path(o, handlerPath.withUnsafeFileSystemRepresentation { String(cString: $0!) }.cString(using: .utf8))
+        }
+
         if let release = options.releaseName {
             sentry_options_set_release(o, release.cString(using: .utf8))
         }
