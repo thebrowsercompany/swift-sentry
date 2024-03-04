@@ -16,6 +16,11 @@ function Copy-Manifest {
     }
 }
 
+if (Test-Path $MsixLayoutLocation) {
+    Remove-Item -Recurse -Force $MsixLayoutLocation
+}
+
+New-Item -ItemType Directory -Path $MsixLayoutLocation
 Copy-Item -Path $PSScriptRoot\..\.build\debug\*.exe $MsixLayoutLocation
 Copy-Item -Path $PSScriptRoot\..\.build\debug\*.dll $MsixLayoutLocation
 Copy-Item -Path $PSScriptRoot\AppxManifest.xml $MsixLayoutLocation
