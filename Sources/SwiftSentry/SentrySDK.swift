@@ -91,6 +91,21 @@ public enum SentrySDK {
         return SentryId(value: id)
     }
 
+    /**
+    * Instructs the transport to flush its send queue.
+    *
+    * The `timeout` parameter is in milliseconds.
+    *
+    * Returns 0 on success, or a non-zero return value in case the timeout is hit.
+    *
+    * Note that this function will block the thread it was called from until the
+    * sentry background worker has finished its work or it timed out, whichever
+    * comes first.
+    */
+    public static func flush(timeout: UInt64) -> Int32 {
+        return sentry_flush(timeout)
+    }
+
     public static func close() {
         sentry_close()
     }
