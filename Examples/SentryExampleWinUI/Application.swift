@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
+import DetourUser
 import Foundation
 import SwiftSentry
 import UWP
@@ -29,6 +30,7 @@ public class SentryApplication: SwiftApplication {
             print("Unhandled exception: \(args.message)")
             fflush(stdout)
         }
+        DetourUser.startDetours()
     }
 
     private var failAsync: Bool = false

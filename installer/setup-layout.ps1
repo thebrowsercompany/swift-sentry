@@ -21,8 +21,8 @@ if (Test-Path $MsixLayoutLocation) {
 }
 
 New-Item -ItemType Directory -Path $MsixLayoutLocation
-Copy-Item -Path $PSScriptRoot\..\.build\debug\*.exe $MsixLayoutLocation
-Copy-Item -Path $PSScriptRoot\..\.build\debug\*.dll $MsixLayoutLocation
+Copy-Item -Path $PSScriptRoot\..\.build\debug\*.exe $MsixLayoutLocation -Exclude "crashpad_handler.exe"
+Copy-Item -Path $PSScriptRoot\..\.build\debug\*.dll $MsixLayoutLocation -Exclude @("crashpad_wer.dll", "sentry.dll")
 Copy-Item -Path $PSScriptRoot\AppxManifest.xml $MsixLayoutLocation
 Copy-Item -Path $PSScriptRoot\resources.pri $MsixLayoutLocation
 Copy-Item -Path $PSScriptRoot\StoreLogo.png $MsixLayoutLocation
@@ -33,6 +33,11 @@ Copy-Manifest -AppToInstall SentryExampleWinUI
 if ((Get-AppxPackage -Name "*SwiftRuntime") -eq $null) {
     Write-Host "installing swift runtime"
     Add-AppxPackage $PSScriptRoot\Swift.Runtime.x64.msix
+}
+
+if ((Get-AppxPackage -Name "*SwiftSentry") -eq $null) {
+    Write-Host "installing swift runtime"
+    Add-AppxPackage $PSScriptRoot\SentryNative.x64.msix
 }
 
 Get-AppxPackage -Name "SwiftSentry.SentryExampleWin"| Remove-AppxPackage

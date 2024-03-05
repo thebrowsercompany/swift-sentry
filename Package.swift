@@ -36,9 +36,27 @@ let package = Package(
         .library(
             name: "swift-sentry",
             targets: ["SwiftSentry"]
+        ),
+        .library(
+            name: "Detours",
+            targets: ["Detours"]
+        ),
+        .library(
+            name: "DetourUser",
+            type: .dynamic,
+            targets: ["DetourUser"]
         )
     ],
     targets: [
+        .target(
+            name: "Detours",
+            exclude: ["uimports.cpp"],
+            publicHeadersPath: "include"
+        ),
+        .target(
+            name: "DetourUser",
+            dependencies: ["Detours"]
+        ),
         .target(
             name: "sentry",
             publicHeadersPath: "include",
@@ -105,6 +123,7 @@ package.targets += [
         name: "SentryExampleWinUI",
         dependencies: [
             "SwiftSentry",
+            "DetourUser",
             .product(name: "WinUI", package: "swift-winui"),
             .product(name: "WindowsFoundation", package: "swift-windowsfoundation"),
         ],

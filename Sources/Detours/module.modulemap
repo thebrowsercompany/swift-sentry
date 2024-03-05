@@ -1,0 +1,4 @@
+module Detours {
+    header "include/Detours.h"
+    export *
+}
