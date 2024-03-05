@@ -55,6 +55,7 @@ public class SentryApplication: SwiftApplication {
         panel.children.append(makeButton("fatalError()") { fatalError("Boom goes the dynamite!") })
         panel.children.append(makeButton("[0][1]") { _ = [0][1] })
         panel.children.append(makeButton("RaiseFailFastException()") { RaiseFailFastException(nil, nil, 0) })
+        panel.children.append(makeButton("Report empty EXCEPTION_POINTERS", onClick: { SentrySDK.capture(exception: EXCEPTION_POINTERS()) }))
 
         m_window.content = panel
     }

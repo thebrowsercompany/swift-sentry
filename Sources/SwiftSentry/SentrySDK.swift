@@ -5,6 +5,10 @@ import sentry
 
 import Foundation
 
+#if os(Windows)
+import WinSDK
+#endif
+
 public enum SentrySDK {
     /// Whether or not the application crashed during it's last run.
     /// - note: This value is only accurate after the SDK have been initialized.
@@ -128,4 +132,11 @@ public enum SentrySDK {
 
       return cachePath
     }
+
+    #if os(Windows)
+    public static func capture(exception: EXCEPTION_POINTERS) {
+      var ctx = sentry_ucontext_t(exception_ptrs: exception)
+      sentry_handle_exception(&ctx)
+    }
+    #endif
 }
