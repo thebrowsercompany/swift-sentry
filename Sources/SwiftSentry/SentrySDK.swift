@@ -90,7 +90,27 @@ public enum SentrySDK {
     }
 
     public static func capture(event: Event) -> SentryId {
-        let id = sentry_capture_event(event.serialized())
+        let eventSerialized = event.serialized()
+        let id = sentry_capture_event(eventSerialized)
+
+        return SentryId(value: id)
+    }
+
+    public static func captureException(type: String, description: String) -> SentryId {
+        let event = Event(level: SentryLevel.fatal)
+        event.message = description
+
+        let eventSerialized = event.serialized()
+
+        let exception = sentry_value_new_exception(type, description)
+        sentry_event_add_exception(eventSerialized, exception)
+
+        // Create a thread for the current thread, attach an stacktrace and add it to the event
+        let thread = sentry_value_new_thread(UInt64(GetCurrentThreadId()),  Thread.current.name)
+        sentry_value_set_stacktrace(thread, nil, 0)
+        sentry_event_add_thread(eventSerialized, thread)
+
+        let id = sentry_capture_event(eventSerialized)
 
         return SentryId(value: id)
     }
@@ -132,11 +152,4 @@ public enum SentrySDK {
 
       return cachePath
     }
-
-    #if os(Windows)
-    public static func capture(exception: EXCEPTION_POINTERS) {
-      var ctx = sentry_ucontext_t(exception_ptrs: exception)
-      sentry_handle_exception(&ctx)
-    }
-    #endif
 }
