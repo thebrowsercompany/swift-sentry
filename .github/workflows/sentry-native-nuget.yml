@@ -1,0 +1,121 @@
+name: Package sentry-native Nuget
+
+on:
+  workflow_dispatch:
+    inputs:
+      sentry-native-tag:
+        type: string
+        description: The tag of sentry-native to build
+        required: true
+      sentry-native-backend:
+        type: choice
+        options:
+          - crashpad
+          - breakpad
+          - inproc
+          - none
+        required: true
+        default: crashpad
+
+jobs:
+  build-sentry-native:
+    strategy:
+      matrix:
+        arch: [
+          { runner: macos-latest, platform: macOS},
+          { runner: windows-latest, platform: win64 },
+          { runner: ubuntu-latest, platform: linux64 }
+        ]
+    runs-on: ${{ matrix.arch.runner }}
+    steps:
+      - name: Checkout sentry-native sources
+        uses: actions/checkout@v4
+        with:
+          repository: getsentry/sentry-native
+          path: "sentry-native"
+          ref: ${{ github.event.inputs.sentry-native-tag }}
+          submodules: 'recursive'
+
+      - name: Setup Visual Studio
+        if: ${{ matrix.arch.platform == 'win64' }}
+        uses: compnerd/gha-setup-vsdevenv@main
+        with:
+          host_arch: arm64
+          components: 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
+          arch: amd64
+
+      - name: Install libcurl4-openssl-dev (Linux)
+        if: ${{ matrix.arch.platform == 'linux64' }}
+        run: sudo apt install -y libcurl4-openssl-dev
+
+      - name: Configure sentry-native (Windows)
+        if: ${{ matrix.arch.platform == 'win64' }}
+        run: |
+          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} `
+                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} `
+                -D CMAKE_BUILD_TYPE=RelWithDebInfo `
+                -S ${{ github.workspace }}/sentry-native `
+                -D CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION="10.0.19041.0" `
+                -G "Visual Studio 17 2022" `
+                -A x64
+      - name: Configure sentry-native (macOS & Linux)
+        if: ${{ matrix.arch.platform == 'macOS' || matrix.arch.platform == 'linux64' }}
+        run: |
+          cmake -B ${{ github.workspace }}/build/${{ matrix.arch.platform }} \
+                -D SENTRY_BACKEND=${{ github.event.inputs.sentry-native-backend }} \
+                -D CMAKE_BUILD_TYPE=RelWithDebInfo \
+                -S ${{ github.workspace }}/sentry-native \
+
+      - name: Build sentry-native
+        run: cmake --build ${{ github.workspace }}/build/${{ matrix.arch.platform }} --parallel --config RelWithDebInfo
+      - name: Install sentry-native
+        run: cmake --install ${{ github.workspace }}/build/${{ matrix.arch.platform }} --prefix ${{ github.workspace }}/install/${{ matrix.arch.platform }} --config RelWithDebInfo
+
+      - name: Upload Install Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: sentry-native-${{ matrix.arch.platform }}-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+          path: ${{ github.workspace }}/install/${{ matrix.arch.platform }}
+  create-nuget-package:
+      needs: build-sentry-native
+      runs-on: [windows-latest]
+      steps:
+        - name: Checkout swift-sentry sources
+          uses: actions/checkout@v4
+          with:
+            path: "swift-sentry"
+        - name: Setup Visual Studio
+          uses: compnerd/gha-setup-vsdevenv@main
+          with:
+            host_arch: arm64
+            components: 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64'
+            arch: amd64
+        - name: Download Windows Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-win64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-win64
+        - name: Download Linux Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-linux64-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-linux64
+        - name: Download macOS Artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: sentry-native-macOS-${{ github.event.inputs.sentry-native-tag }}-${{ github.event.inputs.sentry-native-backend.lowercase }}
+            path: sentry-native-macOS
+        - name: Create Nuget Package
+          run: |
+            $treeish = git -C ${{ github.workspace }}\swift-sentry log -1 --format=%h
+            nuget pack `
+                  ${{ github.workspace }}\swift-sentry\sentry-native.nuspec `
+                  -Properties HEADERDIR=${{ github.workspace }}\sentry-native-win64 `
+                  -Properties WINDIR=${{ github.workspace }}\sentry-native-win64 `
+                  -Properties LINUXDIR=${{ github.workspace }}\sentry-native-linux64 `
+                  -Properties MACOSDIR=${{ github.workspace }}\sentry-native-macOS `
+                  -Version ${{ github.event.inputs.sentry-native-tag }}-${treeish} `
+        - name: Upload NuGet Package
+          uses: actions/upload-artifact@v3
+          with:
+            path: "*.nupkg"
