@@ -115,6 +115,45 @@ public enum SentrySDK {
         return SentryId(value: id)
     }
 
+#if os(Windows)
+    // Report an exception record to Sentry. This is a Windows specific function as
+    // it relies on the EXCEPTION_POINTERS type to get the crash stack of the exception.
+    //
+    // It differs from captureException by the fact that it captures the stacktrace of the
+    // exception instead of the current stacktrace.
+    public static func captureExceptionRecord(type: String, description: String, exceptionRecord: UnsafeMutablePointer<EXCEPTION_POINTERS>!) -> SentryId {
+        let event = Event(level: SentryLevel.fatal)
+        event.message = description
+
+        let eventSerialized = event.serialized()
+        let exception = sentry_value_new_exception(type, description)
+        sentry_event_add_exception(eventSerialized, exception)
+        let thread = sentry_value_new_thread(UInt64(GetCurrentThreadId()),  Thread.current.name)
+
+        // Extract the stacktrace from the exception record and add it to the event.
+        var backtrace = Array<UnsafeMutableRawPointer?>(repeating: nil, count: 128)
+        var frameCount: size_t = 0
+        var exceptionContext = sentry_ucontext_s()
+        guard let exceptionRecord = exceptionRecord else {
+            print("[Error] Exception record is nil.")
+            return SentryId(value: sentry_uuid_nil())
+        }
+
+        exceptionContext.exception_ptrs = exceptionRecord.pointee
+        backtrace.withUnsafeMutableBufferPointer { backtraceBuffer in
+            withUnsafePointer(to: &exceptionContext) { exceptionContextPtr in
+                frameCount = sentry_unwind_stack_from_ucontext(exceptionContextPtr, backtraceBuffer.baseAddress!, 128)
+                sentry_value_set_stacktrace(thread, backtraceBuffer.baseAddress, frameCount)
+                sentry_event_add_thread(eventSerialized, thread)
+            }
+        }
+
+        let id = sentry_capture_event(eventSerialized)
+
+        return SentryId(value: id)
+    }
+#endif
+
     /**
     * Instructs the transport to flush its send queue.
     *
