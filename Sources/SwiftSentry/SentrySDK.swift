@@ -72,6 +72,10 @@ public enum SentrySDK {
             }, nil)
         }
 
+        if let shutdownTimeout = options.shutdownTimeout {
+            sentry_options_set_shutdown_timeout(o, UInt64(shutdownTimeout))
+        }
+
         sentry_init(o)
     }
 

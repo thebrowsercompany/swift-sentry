@@ -13,6 +13,7 @@ public final class Options {
   public var crashHandlerPath: URL?
   public var beforeSend: ((AnyObject) -> AnyObject)?
   public var debug: Bool = false
+  public var shutdownTimeout: TimeInterval?
   public var releaseName: String? = {
     guard let info = Bundle.main.infoDictionary else {
       return nil
