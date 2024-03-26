@@ -21,14 +21,15 @@ In order to successfully build and deploy this code, you must supply the built a
 
 ```text
 vendor/
-├─ include/
-│  ├─ sentry.h
-├─ lib/
-│  ├─ macOS/
-│  ├─ win64/
-│  ├─ linux64/
-├─ bin/
-│  ├─ win64/
+├─ sentry-native/
+  ├─ include/
+  │  ├─ sentry.h
+  ├─ lib/
+  │  ├─ macOS/
+  │  ├─ win64/
+  │  ├─ linux64/
+  ├─ bin/
+  │  ├─ win64/
 ```
 
 the `lib` and `bin` folders are platform specific. Depending on which options you choose when compiling the sentry-native repository you will end up with an install folder for a specific platform which includes `lib` and `bin`, simply copy those items in the structure above.
