@@ -93,6 +93,10 @@ public enum SentrySDK {
         sentry_add_breadcrumb(breadcrumb.serialized())
     }
 
+    public static func setTag(key: String, value: String) {
+        sentry_set_tag(key, value)
+    }
+
     public static func capture(event: Event) -> SentryId {
         let eventSerialized = event.serialized()
         let id = sentry_capture_event(eventSerialized)
