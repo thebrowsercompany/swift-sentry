@@ -134,11 +134,83 @@ public enum SentrySDK {
     // This is safe to be called from a crashing thread and may not return.
     public static func captureExceptionRecord(exceptionRecord: UnsafeMutablePointer<EXCEPTION_POINTERS>) {
         var exceptionContext = sentry_ucontext_s()
-
-        exceptionContext.exception_ptrs = exceptionRecord.pointee
-        withUnsafePointer(to: &exceptionContext) { exceptionContextPtr in
-            sentry_handle_exception(exceptionContextPtr)
+        let stowedExceptionCode = 0xC000027B
+        // Use the custom `captureStowedExceptions` reporter if the exception code is the stowed exception code. This
+        // will include more information about the crash.
+        if exceptionRecord.pointee.ExceptionRecord.pointee.ExceptionCode == stowedExceptionCode {
+            captureStowedExceptions(exceptionRecord: exceptionRecord)
+        } else {
+            exceptionContext.exception_ptrs = exceptionRecord.pointee
+            withUnsafePointer(to: &exceptionContext) { exceptionContextPtr in
+                sentry_handle_exception(exceptionContextPtr)
+            }
         }
+    }
+
+    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) {
+        // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
+        if stowedException.ExceptionForm != 1 {
+            let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.ExceptionForm)")
+            sentry_add_breadcrumb(breadcrumb)
+            return
+        }
+
+        if let stackTrace = stowedException.stackTrace {
+            let ips = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(stowedException.stackTraceCount))
+            let sourceIps = stackTrace.assumingMemoryBound(to: UnsafeMutableRawPointer?.self)
+            for i in 0..<Int(stowedException.stackTraceCount) {
+                ips[i] = sourceIps[i]
+            }
+            let hresult = String(UInt32(bitPattern: stowedException.ResultCode), radix: 16)
+            let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
+            sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
+            sentry_value_append(exceptions, exception)
+            ips.deallocate()
+        }
+
+        // TODO: Check if it's worth including the nested exception in the reports. Local testing shows that the nested exception
+        // type is often `XAML` and the nested exception itself contains a repeat of the stack trace from the stowed exception, so
+        // it's not clear if it's worth adding this to the event.
+    }
+
+    private static func captureStowedExceptions(exceptionRecord: UnsafeMutablePointer<EXCEPTION_POINTERS>) {
+        let event = Event(level: SentryLevel.fatal)
+        event.message = "This is a crash with stowed exceptions. The events are grouped by the stack trace of the latest stowed exception.\n" +
+                        "You can find the crash stack of the other stowed exceptions and of the outer crash by scrolling down."
+        let eventSerialized = event.serialized()
+
+        guard let record = exceptionRecord.pointee.ExceptionRecord else {
+            let breadcrumb = sentry_value_new_breadcrumb("Empty exception record", "ERROR: The exception record is empty")
+            sentry_add_breadcrumb(breadcrumb)
+            sentry_capture_event(eventSerialized)
+            close()
+            return
+        }
+
+        // Log the outer crash stack trace and all the stowed exceptions as distinct exception events.
+        // The events will be displayed in the Sentry UI as a single event with multiple stack traces.
+        let exceptions = sentry_value_new_list();
+        let exception = sentry_value_new_exception("Outer crash", "Outer crash with stowed exceptions")
+        sentry_value_set_stacktrace(exception, nil, 0)
+        sentry_value_append(exceptions, exception);
+        sentry_value_set_by_key(eventSerialized, "exception", exceptions);
+
+        let exceptionInfo = record.pointee.ExceptionInformation
+        // For stowed exceptions, the first element in `ExceptionInformation` is a pointer to an array of `STOWED_EXCEPTION_INFORMATION_V2`
+        // and the second element is the total number of stowed exceptions in this array
+        if let arrayPointer = UnsafeMutablePointer<UnsafeMutablePointer<STOWED_EXCEPTION_INFORMATION_V2>?>(bitPattern: UInt(exceptionInfo.0)) {
+            let totalExceptions = Int(exceptionInfo.1)
+             // Loop from end to beginning to put the last stowed exception at the end of the list, as it's the most recent
+             // one and that's what Sentry will display first.
+            for index in (0..<totalExceptions).reversed() {
+                if let stowedExceptionPointer = arrayPointer.advanced(by: index).pointee {
+                    addStowedExceptionToList(stowedException: stowedExceptionPointer.pointee, index: index, exceptions: exceptions)
+                }
+            }
+        }
+
+        sentry_capture_event(eventSerialized)
+        close()
     }
 #endif
 
