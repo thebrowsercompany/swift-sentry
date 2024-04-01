@@ -137,8 +137,14 @@ public enum SentrySDK {
         let stowedExceptionCode = 0xC000027B
         // Use the custom `captureStowedExceptions` reporter if the exception code is the stowed exception code. This
         // will include more information about the crash.
-        if exceptionRecord.pointee.ExceptionRecord.pointee.ExceptionCode == stowedExceptionCode {
-            captureStowedExceptions(exceptionRecord: exceptionRecord)
+        guard let record = exceptionRecord.pointee.ExceptionRecord else {
+            let breadcrumb = sentry_value_new_breadcrumb("Empty exception record", "ERROR: The exception record is empty")
+            sentry_add_breadcrumb(breadcrumb)
+            return
+        }
+
+        if record.pointee.ExceptionCode == stowedExceptionCode {
+            captureStowedExceptions(exceptionRecord: record.pointee)
         } else {
             exceptionContext.exception_ptrs = exceptionRecord.pointee
             withUnsafePointer(to: &exceptionContext) { exceptionContextPtr in
@@ -173,19 +179,11 @@ public enum SentrySDK {
         // it's not clear if it's worth adding this to the event.
     }
 
-    private static func captureStowedExceptions(exceptionRecord: UnsafeMutablePointer<EXCEPTION_POINTERS>) {
+    private static func captureStowedExceptions(exceptionRecord: EXCEPTION_RECORD) {
         let event = Event(level: SentryLevel.fatal)
         event.message = "This is a crash with stowed exceptions. The events are grouped by the stack trace of the latest stowed exception.\n" +
                         "You can find the crash stack of the other stowed exceptions and of the outer crash by scrolling down."
         let eventSerialized = event.serialized()
-
-        guard let record = exceptionRecord.pointee.ExceptionRecord else {
-            let breadcrumb = sentry_value_new_breadcrumb("Empty exception record", "ERROR: The exception record is empty")
-            sentry_add_breadcrumb(breadcrumb)
-            sentry_capture_event(eventSerialized)
-            close()
-            return
-        }
 
         // Log the outer crash stack trace and all the stowed exceptions as distinct exception events.
         // The events will be displayed in the Sentry UI as a single event with multiple stack traces.
@@ -195,7 +193,7 @@ public enum SentrySDK {
         sentry_value_append(exceptions, exception);
         sentry_value_set_by_key(eventSerialized, "exception", exceptions);
 
-        let exceptionInfo = record.pointee.ExceptionInformation
+        let exceptionInfo = exceptionRecord.ExceptionInformation
         // For stowed exceptions, the first element in `ExceptionInformation` is a pointer to an array of `STOWED_EXCEPTION_INFORMATION_V2`
         // and the second element is the total number of stowed exceptions in this array
         if let arrayPointer = UnsafeMutablePointer<UnsafeMutablePointer<STOWED_EXCEPTION_INFORMATION_V2>?>(bitPattern: UInt(exceptionInfo.0)) {
