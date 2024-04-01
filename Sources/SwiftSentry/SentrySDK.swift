@@ -134,7 +134,6 @@ public enum SentrySDK {
     // This is safe to be called from a crashing thread and may not return.
     public static func captureExceptionRecord(exceptionRecord: UnsafeMutablePointer<EXCEPTION_POINTERS>) {
         var exceptionContext = sentry_ucontext_s()
-        let stowedExceptionCode = 0xC000027B
         // Use the custom `captureStowedExceptions` reporter if the exception code is the stowed exception code. This
         // will include more information about the crash.
         guard let record = exceptionRecord.pointee.ExceptionRecord else {
@@ -143,6 +142,7 @@ public enum SentrySDK {
             return
         }
 
+        let stowedExceptionCode = 0xC000027B
         if record.pointee.ExceptionCode == stowedExceptionCode {
             captureStowedExceptions(exceptionRecord: record.pointee)
         } else {
@@ -151,32 +151,6 @@ public enum SentrySDK {
                 sentry_handle_exception(exceptionContextPtr)
             }
         }
-    }
-
-    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) {
-        // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
-        if stowedException.ExceptionForm != 1 {
-            let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.ExceptionForm)")
-            sentry_add_breadcrumb(breadcrumb)
-            return
-        }
-
-        if let stackTrace = stowedException.stackTrace {
-            let ips = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(stowedException.stackTraceCount))
-            let sourceIps = stackTrace.assumingMemoryBound(to: UnsafeMutableRawPointer?.self)
-            for i in 0..<Int(stowedException.stackTraceCount) {
-                ips[i] = sourceIps[i]
-            }
-            let hresult = String(UInt32(bitPattern: stowedException.ResultCode), radix: 16)
-            let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
-            sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
-            sentry_value_append(exceptions, exception)
-            ips.deallocate()
-        }
-
-        // TODO: Check if it's worth including the nested exception in the reports. Local testing shows that the nested exception
-        // type is often `XAML` and the nested exception itself contains a repeat of the stack trace from the stowed exception, so
-        // it's not clear if it's worth adding this to the event.
     }
 
     private static func captureStowedExceptions(exceptionRecord: EXCEPTION_RECORD) {
@@ -209,6 +183,32 @@ public enum SentrySDK {
 
         sentry_capture_event(eventSerialized)
         close()
+    }
+
+    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) {
+        // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
+        if stowedException.ExceptionForm != 1 {
+            let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.ExceptionForm)")
+            sentry_add_breadcrumb(breadcrumb)
+            return
+        }
+
+        if let stackTrace = stowedException.stackTrace {
+            let ips = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(stowedException.stackTraceCount))
+            let sourceIps = stackTrace.assumingMemoryBound(to: UnsafeMutableRawPointer?.self)
+            for i in 0..<Int(stowedException.stackTraceCount) {
+                ips[i] = sourceIps[i]
+            }
+            let hresult = String(UInt32(bitPattern: stowedException.ResultCode), radix: 16)
+            let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
+            sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
+            sentry_value_append(exceptions, exception)
+            ips.deallocate()
+        }
+
+        // TODO: Check if it's worth including the nested exception in the reports. Local testing shows that the nested exception
+        // type is often `XAML` and the nested exception itself contains a repeat of the stack trace from the stowed exception, so
+        // it's not clear if it's worth adding this to the event.
     }
 #endif
 
