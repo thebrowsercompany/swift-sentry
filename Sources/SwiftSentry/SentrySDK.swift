@@ -6,6 +6,7 @@ import sentry
 import Foundation
 
 #if os(Windows)
+import stowedExceptions
 import WinSDK
 #endif
 
@@ -180,15 +181,14 @@ public enum SentrySDK {
                 }
             }
         }
-
         sentry_capture_event(eventSerialized)
         close()
     }
 
     private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) {
         // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
-        if stowedException.ExceptionForm != 1 {
-            let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.ExceptionForm)")
+        if stowedException.exceptionForm != 1 {
+            let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.exceptionForm)")
             sentry_add_breadcrumb(breadcrumb)
             return
         }
@@ -199,7 +199,7 @@ public enum SentrySDK {
             for i in 0..<Int(stowedException.stackTraceCount) {
                 ips[i] = sourceIps[i]
             }
-            let hresult = String(UInt32(bitPattern: stowedException.ResultCode), radix: 16)
+            let hresult = String(UInt32(bitPattern: stowedException.resultCode), radix: 16)
             let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
             sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
             sentry_value_append(exceptions, exception)
