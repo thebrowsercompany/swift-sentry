@@ -35,6 +35,8 @@ public enum SentrySDK {
         start(options)
     }
 
+    static let fatalErrorMessageHandle = getFatalErrorMessageHandle()
+
     /// Starts the SDK after passing in a closure to configure the options in the SDK.
     /// - note: This should be called on the main thread/actor, but the annotation is
     /// specifically not present to preserve cross-platform compatibility.
@@ -71,6 +73,18 @@ public enum SentrySDK {
                 event
             }, nil)
         }
+
+        #if os(Windows)
+        if let fatalErrorMessageHandle {
+            sentry_options_set_on_crash(o, { uctx, event, _ -> sentry_value_t in
+                if let msg = loadFatalErrorMessageBuffer(SentrySDK.fatalErrorMessageHandle) {
+                    sentry_value_set_by_key(event, "message",
+                                            sentry_value_new_string(msg))
+                }
+                return event
+            }, nil)
+        }
+        #endif
 
         if let shutdownTimeout = options.shutdownTimeout {
             sentry_options_set_shutdown_timeout(o, UInt64(shutdownTimeout))
