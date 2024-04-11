@@ -9,11 +9,12 @@
 #include <atomic>
 
 inline void *getFatalErrorMessageHandle() {
+  // Docs: "The GetModuleHandle function returns a handle to a mapped module without incrementing its reference count"
+  // So we don't need to close it.
   HMODULE hSwiftCore = GetModuleHandleA("swiftCore.dll");
   if (!hSwiftCore) { return nullptr; }
   auto pGetBuf = reinterpret_cast<std::atomic<const char *> *(*)()>(
       GetProcAddress(hSwiftCore, "swift_getFatalErrorMessageBuffer"));
-  CloseHandle(hSwiftCore);
   // Note swift_getFatalErrorMessageBuffer isn't exported in older
   // versions of the Swift toolchain. So it may not exist.
   if (!pGetBuf) { return nullptr; }
