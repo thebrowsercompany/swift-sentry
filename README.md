@@ -8,6 +8,13 @@ A Swift library that wraps the [Sentry native SDK](https://github.com/getsentry/
 2. Copy the needed files into the build directory (see [copying required files section](#copying-required-files))
 3. run `swift run`
 
+If you are building inside Arc instead edit `Vendor/SwiftSentry.cmake`, comment
+out the `checkout_git_repo` of `SwiftSentry` and add:
+```
+set(swiftsentry_SOURCE_DIR /path/to/swift-sentry)
+```
+and do a regular Arc build.
+
 ## Running Tests
 1. Build the application with `swift build`
 2. Copy the needed files into the build directory (see [copying required files section](#copying-required-files))
