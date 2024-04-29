@@ -94,7 +94,7 @@ public enum SentrySDK {
         sentry_init(o)
 
         #if os(Windows)
-            let path = sentry_options_get_handler_ipc_pathw(o)
+            let path = sentry_options_get_handler_ipc_pipew(o)
 
             // It has to be this name rather than "SENTRY..." or "ARC..."
             // because the Chromium sandbox is specially set up to allow this
