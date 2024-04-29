@@ -92,6 +92,17 @@ public enum SentrySDK {
         }
 
         sentry_init(o)
+
+        #if os(Windows)
+            let path = sentry_options_get_handler_ipc_pathw(o)
+
+            // It has to be this name rather than "SENTRY..." or "ARC..."
+            // because the Chromium sandbox is specially set up to allow this
+            // environment variable through to child processes.
+            "CHROME_CRASHPAD_PIPE_NAME".withCString(encodedAs: UTF16.self) {
+                SetEnvironmentVariableW($0, path)
+            }
+        #endif
     }
 
     public static func setUser(_ user: User?) {
