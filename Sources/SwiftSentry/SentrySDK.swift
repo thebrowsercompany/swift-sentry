@@ -169,21 +169,20 @@ public enum SentrySDK {
         }
 
         let stowedExceptionCode = 0xC000027B
-        var context = CONTEXT()
-        // Crashpad will not be able to report the exception if the context record is nil, this can happen if the exception
-        // is coming from RaiseFailFastException as the "contextRecord" argument of this function is optional. In this case,
-        // it's necessary to capture the context manually here.
-        if exceptionRecord.pointee.ContextRecord == nil {
-            let currentThread : HANDLE = GetCurrentThread();
-            RtlCaptureContext(&context);
-            exceptionRecord.pointee.ContextRecord = withUnsafePointer(to: &context) { ptr -> PCONTEXT? in
-                return UnsafeMutablePointer(mutating: ptr)
-            }
-        }
-
         if record.pointee.ExceptionCode == stowedExceptionCode {
             captureStowedExceptions(exceptionRecord: record.pointee)
         } else {
+            // Crashpad will not be able to report the exception if the context record is nil, this can happen if the exception
+            // is coming from RaiseFailFastException as the "contextRecord" argument of this function is optional. In this case,
+            // it's necessary to capture the context manually here.
+            var context = CONTEXT()
+            if exceptionRecord.pointee.ContextRecord == nil {
+                RtlCaptureContext(&context);
+                exceptionRecord.pointee.ContextRecord = withUnsafePointer(to: &context) { ptr -> PCONTEXT? in
+                    return UnsafeMutablePointer(mutating: ptr)
+                }
+            }
+
             exceptionContext.exception_ptrs = exceptionRecord.pointee
             withUnsafePointer(to: &exceptionContext) { exceptionContextPtr in
                 sentry_handle_exception(exceptionContextPtr)
