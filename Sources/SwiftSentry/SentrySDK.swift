@@ -93,6 +93,7 @@ public enum SentrySDK {
 
         sentry_init(o)
 
+        /* Disable child crash reporting temporarily, see PERF-810.
         #if os(Windows)
             let path = sentry_options_get_handler_ipc_pipew(o)
 
@@ -103,6 +104,7 @@ public enum SentrySDK {
                 SetEnvironmentVariableW($0, path)
             }
         #endif
+        */
     }
 
     public static func setUser(_ user: User?) {
