@@ -197,6 +197,9 @@ public enum SentrySDK {
         event.message = "This is a crash with stowed exceptions. The events are grouped by the stack trace of the latest stowed exception.\n" +
                         "You can find the crash stack of the other stowed exceptions and of the outer crash by scrolling down."
         let eventSerialized = event.serialized()
+        // The list of loaded modules is cached and might not contain the modules that were loaded after initializing Sentry (e.g. the WinApp runtimes).
+        // Clearing the module cache will force Sentry to re-fetch the list of loaded modules.
+        sentry_clear_modulecache()
 
         // Log the outer crash stack trace and all the stowed exceptions as distinct exception events.
         // The events will be displayed in the Sentry UI as a single event with multiple stack traces.
@@ -209,26 +212,38 @@ public enum SentrySDK {
         let exceptionInfo = exceptionRecord.ExceptionInformation
         // For stowed exceptions, the first element in `ExceptionInformation` is a pointer to an array of `STOWED_EXCEPTION_INFORMATION_V2`
         // and the second element is the total number of stowed exceptions in this array
+        var hresult: String?
         if let arrayPointer = UnsafeMutablePointer<UnsafeMutablePointer<STOWED_EXCEPTION_INFORMATION_V2>?>(bitPattern: UInt(exceptionInfo.0)) {
             let totalExceptions = Int(exceptionInfo.1)
              // Loop from end to beginning to put the last stowed exception at the end of the list, as it's the most recent
              // one and that's what Sentry will display first.
             for index in (0..<totalExceptions).reversed() {
                 if let stowedExceptionPointer = arrayPointer.advanced(by: index).pointee {
-                    addStowedExceptionToList(stowedException: stowedExceptionPointer.pointee, index: index, exceptions: exceptions)
+                    hresult = addStowedExceptionToList(stowedException: stowedExceptionPointer.pointee, index: index, exceptions: exceptions)
                 }
             }
         }
+        // Add a few fingerprints to the event to improve the clustering of the stowed exceptions. They sometime all get reported as individual crashes,
+        // these few fingerprints should help cluster them. Using the HRESULT of the last stowed exception as well as the number of stowed exceptions.
+        // seems like a good starting point.
+        let fingerprint = sentry_value_new_list();
+        sentry_value_append(fingerprint, sentry_value_new_string("StowedException"));
+        if hresult != nil {
+            sentry_value_append(fingerprint, sentry_value_new_string(hresult));
+        }
+        sentry_value_append(fingerprint, sentry_value_new_string(String(exceptionInfo.1)));
+        sentry_value_set_by_key(eventSerialized, "fingerprint", fingerprint);
+
         sentry_capture_event(eventSerialized)
         close()
     }
 
-    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) {
+    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) -> String?{
         // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
         if stowedException.exceptionForm != 1 {
             let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.exceptionForm)")
             sentry_add_breadcrumb(breadcrumb)
-            return
+            return nil
         }
 
         if let stackTrace = stowedException.stackTrace {
@@ -242,11 +257,14 @@ public enum SentrySDK {
             sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
             sentry_value_append(exceptions, exception)
             ips.deallocate()
+            return hresult
         }
 
         // TODO: Check if it's worth including the nested exception in the reports. Local testing shows that the nested exception
         // type is often `XAML` and the nested exception itself contains a repeat of the stack trace from the stowed exception, so
         // it's not clear if it's worth adding this to the event.
+
+        return nil
     }
 #endif
 
