@@ -179,7 +179,7 @@ public enum SentrySDK {
             // it's necessary to capture the context manually here.
             var context = CONTEXT()
             if exceptionRecord.pointee.ContextRecord == nil {
-                RtlCaptureContext(&context);
+                RtlCaptureContext(&context)
                 exceptionRecord.pointee.ContextRecord = withUnsafePointer(to: &context) { ptr -> PCONTEXT? in
                     return UnsafeMutablePointer(mutating: ptr)
                 }
@@ -203,10 +203,13 @@ public enum SentrySDK {
 
         // Log the outer crash stack trace and all the stowed exceptions as distinct exception events.
         // The events will be displayed in the Sentry UI as a single event with multiple stack traces.
-        let exceptions = sentry_value_new_list();
+        let exceptions = sentry_value_new_list()
         let exception = sentry_value_new_exception("Outer crash", "Outer crash with stowed exceptions")
+
+        setTag(key: "handled", value: "no")
+
         sentry_value_set_stacktrace(exception, nil, 0)
-        sentry_value_append(exceptions, exception);
+        sentry_value_append(exceptions, exception)
         sentry_value_set_by_key(eventSerialized, "exception", exceptions);
 
         let exceptionInfo = exceptionRecord.ExceptionInformation
@@ -215,30 +218,32 @@ public enum SentrySDK {
         var hresult: String?
         if let arrayPointer = UnsafeMutablePointer<UnsafeMutablePointer<STOWED_EXCEPTION_INFORMATION_V2>?>(bitPattern: UInt(exceptionInfo.0)) {
             let totalExceptions = Int(exceptionInfo.1)
-             // Loop from end to beginning to put the last stowed exception at the end of the list, as it's the most recent
-             // one and that's what Sentry will display first.
             for index in (0..<totalExceptions).reversed() {
                 if let stowedExceptionPointer = arrayPointer.advanced(by: index).pointee {
-                    hresult = addStowedExceptionToList(stowedException: stowedExceptionPointer.pointee, index: index, exceptions: exceptions)
+                    hresult = addStowedExceptionToList(
+                        stowedException: stowedExceptionPointer.pointee,
+                        index: totalExceptions - index - 1,
+                        exceptions: exceptions,
+                        isMostRecent: index == 0)
                 }
             }
         }
         // Add a few fingerprints to the event to improve the clustering of the stowed exceptions. They sometime all get reported as individual crashes,
         // these few fingerprints should help cluster them. Using the HRESULT of the last stowed exception as well as the number of stowed exceptions.
         // seems like a good starting point.
-        let fingerprint = sentry_value_new_list();
-        sentry_value_append(fingerprint, sentry_value_new_string("StowedException"));
+        let fingerprint = sentry_value_new_list()
+        sentry_value_append(fingerprint, sentry_value_new_string("StowedException"))
         if hresult != nil {
-            sentry_value_append(fingerprint, sentry_value_new_string(hresult));
+            sentry_value_append(fingerprint, sentry_value_new_string(hresult))
         }
-        sentry_value_append(fingerprint, sentry_value_new_string(String(exceptionInfo.1)));
-        sentry_value_set_by_key(eventSerialized, "fingerprint", fingerprint);
+        sentry_value_append(fingerprint, sentry_value_new_string(String(exceptionInfo.1)))
+        sentry_value_set_by_key(eventSerialized, "fingerprint", fingerprint)
 
         sentry_capture_event(eventSerialized)
         close()
     }
 
-    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, nested: Bool = false) -> String?{
+    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> String?{
         // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
         if stowedException.exceptionForm != 1 {
             let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.exceptionForm)")
@@ -255,6 +260,13 @@ public enum SentrySDK {
             let hresult = String(UInt32(bitPattern: stowedException.resultCode), radix: 16)
             let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
             sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
+
+            if isMostRecent {
+              let mechanism = sentry_value_new_object()
+              sentry_value_set_by_key(mechanism, "type", sentry_value_new_string("generic"))
+              sentry_value_set_by_key(mechanism, "handled", sentry_value_new_bool(Int32(false)))
+              sentry_value_set_by_key(exception, "mechanism", mechanism)
+            }
             sentry_value_append(exceptions, exception)
             ips.deallocate()
             return hresult
