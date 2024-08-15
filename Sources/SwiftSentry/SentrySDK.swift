@@ -36,7 +36,37 @@ public enum SentrySDK {
         start(options)
     }
 
+    #if os(Windows)
     static let fatalErrorMessageHandle = getFatalErrorMessageHandle()
+    // Exception number for C++ exceptions
+    static let EH_EXCEPTION_NUMBER: UInt32 = 0xE06D7363
+
+
+    private static func onCrash(uctx: UnsafePointer<sentry_ucontext_t>, event: Event, closure: UnsafeRawPointer?) -> sentry_value_t {
+      if let fatalErrorMessageHandle = SentrySDK.fatalErrorMessageHandle {
+        if let msg = loadFatalErrorMessageBuffer(SentrySDK.fatalErrorMessageHandle) {
+          sentry_value_set_by_key(event, "message",
+                                    sentry_value_new_string(msg))
+        }
+      }
+
+      let exceptionRecord = uctx.pointee.exception_ptrs.pointee.ExceptionRecord
+
+      // Check whether this was a C++ exception
+      if exceptionRecord.ExceptionCode == SentrySDK.EH_EXCEPTION_NUMBER {
+          // Invoke the default filter and pass it the exception pointers from our crash context
+          if let defaultFilter = closure?.assumingMemoryBound(to: (@convention(c) (UnsafeMutablePointer<_EXCEPTION_POINTERS>) -> Void).self) {
+              let exceptionPtrs = uctx.pointee.exception_ptrs
+              defaultFilter.pointee(UnsafeMutablePointer(mutating: exceptionPtrs))
+              // This will never execute because the terminate handler should exit
+              return sentry_value_new_null()
+          }
+      }
+
+      // If it wasn't a C++ exception, continue with a minidump + upload
+      return event
+    }
+    #endif
 
     /// Starts the SDK after passing in a closure to configure the options in the SDK.
     /// - note: This should be called on the main thread/actor, but the annotation is
@@ -76,15 +106,17 @@ public enum SentrySDK {
         }
 
         #if os(Windows)
-        if let fatalErrorMessageHandle {
-            sentry_options_set_on_crash(o, { uctx, event, _ -> sentry_value_t in
-                if let msg = loadFatalErrorMessageBuffer(SentrySDK.fatalErrorMessageHandle) {
-                    sentry_value_set_by_key(event, "message",
-                                            sentry_value_new_string(msg))
-                }
-                return event
-            }, nil)
+        LPTOP_LEVEL_EXCEPTION_FILTER default_filter = SetUnhandledExceptionFilter(nil);
+
+        // Define a termination handler
+        set_terminate {
+            // TODO: Your handler code, ensure to exit or TerminateProcess here rather than abort()
+            sentry_close()
+            exit(EXIT_FAILURE)
         }
+
+        // 3. Init sentry with an onCrash hook and pass `default_filter` as the `closure` argument
+        sentry_options_set_on_crash(o, onCrash, UnsafeRawPointer(defaultFilter));
         #endif
 
         if let shutdownTimeout = options.shutdownTimeout {
