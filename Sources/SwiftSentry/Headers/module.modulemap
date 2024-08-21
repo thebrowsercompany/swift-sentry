@@ -4,3 +4,9 @@ module stowedExceptions [system] {
   header "StowedExceptionInformation.h"
   export *
 }
+
+module RoErrorAPI [system] {
+  header "RestrictedErrorInformation.h"
+  export *
+  link "combase"
+}
