@@ -243,11 +243,19 @@ public enum SentrySDK {
         close()
     }
 
+    private static func succeeded(result: HRESULT) -> Bool {
+        return result >= 0
+    }
+
     private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> String?{
         // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
         if stowedException.exceptionForm != 1 {
             let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.exceptionForm)")
             sentry_add_breadcrumb(breadcrumb)
+            return nil
+        }
+
+        guard !succeeded(result: stowedException.resultCode) else {
             return nil
         }
 
