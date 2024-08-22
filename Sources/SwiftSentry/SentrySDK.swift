@@ -244,8 +244,8 @@ public enum SentrySDK {
         close()
     }
 
-    private static func succeeded(result: HRESULT) -> Bool {
-        return result >= 0
+    private static func succeeded(_ hr: HRESULT) -> Bool {
+        return hr >= 0
     }
 
     private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> Bool {
@@ -256,7 +256,7 @@ public enum SentrySDK {
             return false
         }
 
-        guard !succeeded(result: stowedException.resultCode) else { return false }
+        guard !succeeded(stowedException.resultCode) else { return false }
 
         if let stackTrace = stowedException.stackTrace {
             let ips = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(stowedException.stackTraceCount))
