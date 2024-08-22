@@ -270,13 +270,10 @@ public enum SentrySDK {
     }
 
     private static func addRestrictedErrorInfoToList(exceptions: sentry_value_t, errorInfo: RestrictedErrorInfo) {
-        let exception = sentry_value_new_exception("UnhandledException", "HRESULT: \(errorInfo.hr.stringRepresentation) - \(errorInfo.description)")
-
-        let mechanism = sentry_value_new_object()
-        sentry_value_set_by_key(mechanism, "type", sentry_value_new_string("unhandled"))
-        sentry_value_set_by_key(mechanism, "handled", sentry_value_new_bool(Int32(false)))
-        sentry_value_set_by_key(exception, "mechanism", mechanism)
-        sentry_value_append(exceptions, exception)
+        let exception = Exception(type: "UnhandledException", description: "HRESULT: \(errorInfo.hr.stringRepresentation) - \(errorInfo.description)")
+        let mechanism = Mechanism(type: "unhandled", handled: false)
+        exception.setMechanism(mechanism)
+        sentry_value_append(exceptions, exception.value)
     }
 
     private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> Bool {
@@ -295,15 +292,12 @@ public enum SentrySDK {
                 ips[i] = sourceIps[i]
             }
 
-            let hresult = String(UInt32(bitPattern: stowedException.resultCode), radix: 16)
-            let exception = sentry_value_new_exception("StowedException", "Stowed exception #\(index + 1) - HRESULT: 0x\(hresult)")
-            sentry_value_set_stacktrace(exception, ips, Int(stowedException.stackTraceCount))
+            let exception = Exception(type: "StowedException", description: "Stowed exception #\(index + 1) - HRESULT: \(stowedException.resultCode.stringRepresentation)")
+            sentry_value_set_stacktrace(exception.value, ips, Int(stowedException.stackTraceCount))
 
             if isMostRecent {
-              let mechanism = sentry_value_new_object()
-              sentry_value_set_by_key(mechanism, "type", sentry_value_new_string("generic"))
-              sentry_value_set_by_key(mechanism, "handled", sentry_value_new_bool(Int32(false)))
-              sentry_value_set_by_key(exception, "mechanism", mechanism)
+              let mechanism = Mechanism(type: "generic", handled: false)
+              exception.setMechanism(mechanism)
             }
             sentry_value_append(exceptions, exception)
             ips.deallocate()
