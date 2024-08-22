@@ -220,11 +220,12 @@ public enum SentrySDK {
             let totalExceptions = Int(exceptionInfo.1)
             for index in (0..<totalExceptions).reversed() {
                 if let stowedExceptionPointer = arrayPointer.advanced(by: index).pointee {
-                    hresult = addStowedExceptionToList(
+                    guard addStowedExceptionToList(
                         stowedException: stowedExceptionPointer.pointee,
                         index: totalExceptions - index - 1,
                         exceptions: exceptions,
-                        isMostRecent: index == 0)
+                        isMostRecent: index == 0) else { continue }
+                      hresult = stowedExceptionPointer.pointee.resultCode.stringRepresentation
                 }
             }
         }
@@ -243,13 +244,19 @@ public enum SentrySDK {
         close()
     }
 
-    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> String?{
+    private static func succeeded(_ hr: HRESULT) -> Bool {
+        return hr >= 0
+    }
+
+    private static func addStowedExceptionToList(stowedException: STOWED_EXCEPTION_INFORMATION_V2, index: Int, exceptions: sentry_value_t, isMostRecent: Bool = false) -> Bool {
         // The stowed exception form should always be 1, let's still check it and log a breadcrumb if it's not.
         if stowedException.exceptionForm != 1 {
             let breadcrumb = sentry_value_new_breadcrumb("Unexpected stowed exception form", "ERROR: The stowed exception form is not 1, it's \(stowedException.exceptionForm)")
             sentry_add_breadcrumb(breadcrumb)
-            return nil
+            return false
         }
+
+        guard !succeeded(stowedException.resultCode) else { return false }
 
         if let stackTrace = stowedException.stackTrace {
             let ips = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: Int(stowedException.stackTraceCount))
@@ -269,14 +276,14 @@ public enum SentrySDK {
             }
             sentry_value_append(exceptions, exception)
             ips.deallocate()
-            return hresult
+            return true
         }
 
         // TODO: Check if it's worth including the nested exception in the reports. Local testing shows that the nested exception
         // type is often `XAML` and the nested exception itself contains a repeat of the stack trace from the stowed exception, so
         // it's not clear if it's worth adding this to the event.
 
-        return nil
+        return false
     }
 #endif
 
