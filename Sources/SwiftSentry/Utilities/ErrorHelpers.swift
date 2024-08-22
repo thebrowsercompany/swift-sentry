@@ -12,7 +12,6 @@ struct RestrictedErrorInfo {
 //   - https://github.com/thebrowsercompany/swift-winrt/blob/a73deec57624d04776f0d2b97882bd330749ac39/swiftwinrt/Resources/Support/Error.swift#L104
 func getRestrictedErrorInfo() -> RestrictedErrorInfo? {
 
-- method hrToString is a copy of hrToString (link) using HRESULT.stringRepresentation
   var errorInfo: UnsafeMutablePointer<IRestrictedErrorInfo>?
   guard GetRestrictedErrorInfo(&errorInfo) == S_OK, let errorInfo else { return nil }
   defer {
