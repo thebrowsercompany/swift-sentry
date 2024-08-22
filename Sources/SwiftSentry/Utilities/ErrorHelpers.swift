@@ -7,7 +7,12 @@ struct RestrictedErrorInfo {
   let description: String
 }
 
+// Method getRestrictedErrorInfo is a modified version of getErrorDescription from swift-winrt. It's been modified to just grab
+// the error info and doesn't have to match based off HRESULT.
+//   - https://github.com/thebrowsercompany/swift-winrt/blob/a73deec57624d04776f0d2b97882bd330749ac39/swiftwinrt/Resources/Support/Error.swift#L104
 func getRestrictedErrorInfo() -> RestrictedErrorInfo? {
+
+- method hrToString is a copy of hrToString (link) using HRESULT.stringRepresentation
   var errorInfo: UnsafeMutablePointer<IRestrictedErrorInfo>?
   guard GetRestrictedErrorInfo(&errorInfo) == S_OK, let errorInfo else { return nil }
   defer {
@@ -48,6 +53,7 @@ private func MAKELANGID(_ p: WORD, _ s: WORD) -> DWORD {
   return DWORD((s << 10) | p)
 }
 
+// hrToString is a copy of hrToString from swift-winrt, with changes to use HRESULT.stringRepresentation
 private func hrToString(_ hr: HRESULT) -> String {
   let dwFlags: DWORD = DWORD(FORMAT_MESSAGE_ALLOCATE_BUFFER)
                        | DWORD(FORMAT_MESSAGE_FROM_SYSTEM)

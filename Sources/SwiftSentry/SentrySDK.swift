@@ -299,7 +299,7 @@ public enum SentrySDK {
               let mechanism = Mechanism(type: "generic", handled: false)
               exception.setMechanism(mechanism)
             }
-            sentry_value_append(exceptions, exception)
+            sentry_value_append(exceptions, exception.value)
             ips.deallocate()
             return true
         }
