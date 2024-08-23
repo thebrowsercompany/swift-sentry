@@ -8,5 +8,4 @@ module stowedExceptions [system] {
 module RoErrorAPI [system] {
   header "RestrictedErrorInformation.h"
   export *
-  link "combase"
 }

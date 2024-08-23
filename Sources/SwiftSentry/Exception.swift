@@ -3,7 +3,7 @@ import sentry
 
 struct Exception {
     let type: String
-    let description: string
+    let description: String
     let value: sentry_value_t
 
     init(type: String, description: String) {

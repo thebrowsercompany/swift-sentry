@@ -11,6 +11,6 @@ internal struct Mechanism {
         self.type = type
         self.handled = handled
         sentry_value_set_by_key(value, "type", sentry_value_new_string(type))
-        sentry_value_set_by_key(value, "handled", sentry_value_new_boolean(handled))
+        sentry_value_set_by_key(value, "handled", sentry_value_new_bool(Int32(handled ? 1 : 0)))
     }
 }
