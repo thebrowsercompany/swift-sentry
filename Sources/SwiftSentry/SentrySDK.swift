@@ -125,6 +125,10 @@ public enum SentrySDK {
         sentry_set_tag(key, value)
     }
 
+    public static func removeTag(key: String) {
+        sentry_remove_tag(key)
+    }
+
     public static func capture(event: Event) -> SentryId {
         let eventSerialized = event.serialized()
         let id = sentry_capture_event(eventSerialized)
