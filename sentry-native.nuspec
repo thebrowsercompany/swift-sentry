@@ -10,13 +10,22 @@
         <repository type="git" url="https://github.com/thebrowsercompany/swift-sentry" branch="main"/>
     </metadata>
     <files>
-        <file src="$DESTDIR$\bin\crashpad_handler.exe" target="bin"/>
-        <file src="$DESTDIR$\bin\crashpad_handler.pdb" target="bin"/>
-        <file src="$DESTDIR$\bin\crashpad_wer.dll" target="bin"/>
-        <file src="$DESTDIR$\bin\crashpad_wer.pdb" target="bin"/>
-        <file src="$DESTDIR$\bin\sentry.dll" target="bin"/>
-        <file src="$DESTDIR$\bin\sentry.pdb" target="bin"/>
-        <file src="$DESTDIR$\include\sentry.h" target="include"/>
-        <file src="$DESTDIR$\lib\sentry.lib" target="lib"/>
+        <!-- Header File-->
+        <file src="$HEADERDIR$\include\sentry.h" target="include"/>
+        <!-- Windows Files-->
+        <file src="$WINDIR$\bin\crashpad_handler.exe" target="bin\win64"/>
+        <file src="$WINDIR$\bin\crashpad_handler.pdb" target="debug\win64"/>
+        <file src="$WINDIR$\bin\crashpad_wer.dll" target="bin\win64"/>
+        <file src="$WINDIR$\bin\crashpad_wer.pdb" target="debug\win64"/>
+        <file src="$WINDIR$\bin\sentry.dll" target="bin\win64"/>
+        <file src="$WINDIR$\bin\sentry.pdb" target="debug\win64"/>
+        <file src="$WINDIR$\lib\sentry.lib" target="lib\win64"/>
+        <!-- Linux Files-->
+        <file src="$LINUXDIR$\bin\crashpad_handler" target="bin\linux64\crashpad_handler"/>
+        <file src="$LINUXDIR$\lib\libsentry.so" target="lib\linux64"/>
+        <!-- macOS Files -->
+        <file src="$MACOSDIR$\bin\crashpad_handler" target="bin\macOS\crashpad_handler"/>
+        <file src="$MACOSDIR$\lib\libsentry.dylib" target="lib\macOS"/>
+        <file src="$MACOSDIR$\lib\libsentry.dylib.dSYM\**" target="debug\macOS\libsentry.dylib.dSYM"/>
     </files>
 </package>
