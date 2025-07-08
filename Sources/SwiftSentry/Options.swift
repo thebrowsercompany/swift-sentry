@@ -14,20 +14,7 @@ public final class Options {
   public var beforeSend: ((AnyObject) -> AnyObject)?
   public var debug: Bool = false
   public var shutdownTimeout: TimeInterval?
-
-  /// Overrides `releaseName`. Useful if your executable doesn't 
-  /// have an associated Info.plist or you just want to hardcode a value.
-  public var customReleaseName: String? = nil
-
-  /// Returns a string computed by the main bundle's info dictionary if present.
-  /// "`CFBundleIdentifier`@`CFBundleShortVersionString`+`CFBundleVersion`"
-  ///
-  /// If `customReleaseName` is set, that value will always be used instead.
   public var releaseName: String? = {
-    if let customReleaseName {
-      return customReleaseName
-    }
-
     guard let info = Bundle.main.infoDictionary else {
       return nil
     }
