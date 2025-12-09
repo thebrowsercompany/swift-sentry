@@ -64,3 +64,7 @@ internal extension SentryId {
     self.uuid = UUID(uuidString: String(cString: cString)) ?? .empty
   }
 }
+
+public extension SentryId {
+  static var empty = SentryId(UUID: .empty)
+}
